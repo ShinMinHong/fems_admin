@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 감지기 신호 Log DAO -->
+<mapper namespace="com.firealarm.admin.common.dao.FireDetectorLogDAO">
+	<!-- 단말기 최근 로그 목록 조회 -->
+	<select id="getRecentListsByDeviceSeqAndStoreSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapFireDetectorEventLogVO">
+		SELECT
+			*
+		FROM
+			fa_fire_detector_log
+		WHERE
+		 	fire_detector_seq = #{detector}
+		 	AND store_seq = #{storeSeq}
+		ORDER BY fire_detector_signal_seq DESC
+		LIMIT 10
+	</select>
+
+	<!-- 신호목록을 fa_fire_detector_log에 Insert All -->
+	<insert id="insertAll" parameterType="com.firealarm.admin.common.vo.FireDetectorLogDT">
+            INSERT INTO fa_fire_detector_log (fire_detector_seq, mng_area_seq, market_seq
+									, store_seq, ctn_no, msg_ver
+									, signal_type, battery_value, smoke_value
+									, temperature_value, flame1_value, flame2_value
+									, co_value, smoke_event, temperature_event
+									, flame_event, co_event, not_fire_yn
+									, demon_reg_date, reg_date, battery2_value)
+                             VALUES
+                            	<foreach collection="list" item="item" separator=", " close=";">
+									(#{item.fireDetectorSeq}, #{item.mngAreaSeq}, #{item.marketSeq}
+									, #{item.storeSeq}, #{item.ctnNo}, #{item.msgVer}
+									, #{item.signalType}, #{item.batteryValue}, #{item.smokeValue}
+									, #{item.temperatureValue}, #{item.flame1Value}, #{item.flame2Value}
+									, #{item.coValue}, #{item.smokeEvent}, #{item.temperatureEvent}
+									, #{item.flameEvent}, #{item.coEvent}, #{item.notFireYn}
+									, #{item.demonRegDate}, now(), #{item.battery2Value})
+								</foreach>
+	</insert>
+</mapper>

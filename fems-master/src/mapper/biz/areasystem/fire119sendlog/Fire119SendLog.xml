@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 119 다매체 발신조회  -->
+<mapper namespace="com.firealarm.admin.biz.areasystem.fire119sendlog.dao.Fire119SendLogDAO">
+
+	<sql id="getList_sql">
+		SELECT f119_send_log_seq
+              ,mng_area_seq
+              ,(SELECT mng_area_name FROM fa_mng_area WHERE mng_area_seq = F.mng_area_seq) AS mng_area_name
+              ,market_seq
+              ,(SELECT market_name FROM fa_market WHERE market_seq = F.market_seq) AS market_name
+              ,store_seq
+              ,(SELECT store_name FROM fa_store WHERE store_seq = F.store_seq) AS store_name
+              ,sttemnt_ty_code
+              ,sttemnt_ty_detail_code
+              ,sttemnt_cn
+              ,call_name
+              ,call_tel
+              ,aplcnt_nm
+              ,aplcnt_telno
+              ,addr_ty
+              ,ctrd_code
+              ,signgu_code
+              ,dong_code
+              ,li_code
+              ,mntn_at
+              ,mnnm
+              ,slno
+              ,msfrtn_grad
+              ,sensor_knd
+              ,gas_lkg_at
+              ,tp
+              ,smoke_dnsty
+              ,atchmnfl_at
+              ,msfrtn_kn_code
+              ,location
+              ,send_result
+              ,send_date
+		FROM   fa_f119_send_log F
+		<where>
+			mng_area_seq  = #{me.mngAreaSeq} :: INTEGER
+			AND send_date::date &gt;= #{search.startDate}::date
+	     	AND send_date::date &lt; #{search.endDate}::date + interval '1 day'
+			<if test="!@Ognl@isEmpty(search)">
+				<if test="!@Ognl@isEmpty(search.receiveCallNm)">
+					AND call_name LIKE CONCAT('%',#{search.receiveCallNm},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.receiveAplcntNm)">
+					AND aplcnt_nm LIKE CONCAT('%',#{search.receiveAplcntNm},'%')
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.fire119sendlog.vo.Fire119SendLogVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.fire119sendlog.vo.Fire119SendLogVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+</mapper>

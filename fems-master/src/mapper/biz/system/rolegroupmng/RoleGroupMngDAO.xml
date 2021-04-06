@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 권한그룹관리 DAO -->
+<mapper namespace="com.firealarm.admin.biz.system.rolegroupmng.dao.RoleGroupMngDAO">
+
+	<select id="getRoleList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolemng.vo.RoleMngVO">
+		SELECT
+			*
+	  	FROM
+	  		fa_ROLE
+	</select>
+
+	<sql id="getList_sql">
+		SELECT
+			*
+		FROM
+			fa_ROLEGROUP
+		<where>
+			<if test="!@Ognl@isEmpty(search.rolegroupCode)">
+			   and rolegroup_code LIKE CONCAT('%', #{search.rolegroupCode},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.rolegroupName)">
+			   AND rolegroup_name LIKE CONCAT('%',  #{search.rolegroupName},'%')
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<resultMap id="getDetailsPageResultMap" type="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngDetailsVO" autoMapping="true">
+		<result property="rolegroupCode" column="rolegroup_code" />
+		<collection property="roleDetailsList" column="{rolegroupCode=rolegroup_code}" javaType="ArrayList" ofType="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngRoleDetailsVO" select="getRoleDetailsListByRolegroupCode"/>
+	</resultMap>
+
+	<select id="getDetailsPageByRolegroupCode" parameterType="java.util.Map" resultMap="getDetailsPageResultMap">
+		SELECT
+			*
+		FROM
+			fa_ROLEGROUP
+		WHERE
+			 rolegroup_code = #{rolegroupCode}
+	</select>
+
+	<select id="getRoleDetailsListByRolegroupCode" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngRoleDetailsVO">
+ 		SELECT
+		    RR.role_code,
+		    RR.role_name,
+		    (case
+		        when RRR.role_code is not null then 1
+		        else 0
+		    end) CHECKED
+		FROM
+	    	fa_ROLE RR
+			left join fa_ROLEGROUP_ROLE RRR
+			ON RR.role_code = RRR.role_code
+			and RRR.rolegroup_code = #{rolegroupCode}
+	</select>
+
+	<select id="getByRolegroup" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngVO">
+		SELECT
+			*
+		FROM
+			fa_rolegroup
+		WHERE
+			 rolegroup_code = #{rolegroupCode}
+	</select>
+
+	<insert id="insertRolegroupRole" parameterType="java.util.Map">
+		INSERT INTO
+			fa_rolegroup_role(rolegroup_code, role_code, reg_date)
+		VALUES
+		<foreach item="roleCode" collection="roleCodeList" separator=", " close=";">
+			( #{rolegroupCode}, #{roleCode}, now() )
+		</foreach>
+	</insert>
+
+	<!-- 권한 그룹 등록  -->
+	<update id="insertRolegroup" parameterType="java.util.Map">
+		INSERT INTO
+			fa_ROLEGROUP(rolegroup_code, rolegroup_name, reg_date, reg_admin_id)
+		VALUES
+				(#{rolegroupCode}, #{rolegroupName}, now(), #{regAdminId})
+	</update>
+
+	<!-- 권한 그룹 정보 수정 -->
+	<update id="updateRolegroup" parameterType="java.util.Map">
+		UPDATE
+			fa_ROLEGROUP
+		SET
+			rolegroup_code=#{rolegroupCode},
+			rolegroup_name=#{rolegroupName}
+		WHERE
+			rolegroup_code = #{prevRolegroupCode}
+	</update>
+
+	<delete id="deleteRolegroup" parameterType="java.util.Map">
+		DELETE FROM
+			fa_ROLEGROUP
+		WHERE
+			rolegroup_code = #{rolegroupCode}
+	</delete>
+
+	<delete id="deleteRolegroupRole" parameterType="java.util.Map">
+		DELETE FROM
+			fa_ROLEGROUP_ROLE
+		WHERE
+			rolegroup_code = #{rolegroupCode}
+	</delete>
+
+	<!-- 권한 그룹 권한 단건 등록  -->
+	<insert id="insertDataRoleRoleGroup" parameterType="java.util.Map">
+		INSERT  INTO
+			fa_rolegroup_role (rolegroup_code, role_code, reg_date, reg_admin_id)
+		VALUES
+			(#{rolegroupCode}, #{roleCode}, now(),#{regAdminId} )
+	</insert>
+
+</mapper>

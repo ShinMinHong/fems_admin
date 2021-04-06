@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.biz.firedetector.lowbatterydetector.dao.LowBatteryDetectorDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			*
+		FROM
+			(
+			SELECT
+				A.mng_area_seq,
+				A.mng_area_name,
+				M.market_seq,
+				M.market_name,
+				S.store_seq,
+				S.store_name ,
+				FD.*,
+				FD.model_no,
+				FD.ctn_no ,
+				FD.fire_detector_ack_value,
+				case
+					WHEN FD.store_seq is null THEN '2' <!-- 대기 -->
+					WHEN (FDNS.last_updt_dt &gt; now() - interval '73hour') = false then '3' <!-- 통신두절 -->
+					else '1' <!-- 정상 -->
+				END as fireDetectorStatus,
+				FDNS.battery_value as remaind_battery,
+				FDNS.battery2_value as remaind_battery2,
+				FDNS.last_updt_dt
+			FROM
+				fa_fire_detector as FD
+			INNER JOIN fa_fire_detector_now_status as FDNS on FDNS.fire_detector_seq = FD.fire_detector_seq AND (FDNS.battery_value &lt; 20 OR FDNS.battery2_value &lt; 20)
+			LEFT JOIN fa_store as S on FD.store_seq = S.store_seq
+			LEFT JOIN fa_market as M on S.market_seq = M.market_seq
+			LEFT JOIN fa_mng_area as A on M.mng_area_seq = A.mng_area_seq
+			) AS SUB
+		<where>
+			sub.mng_area_seq= #{me.mngAreaSeq} :: Integer
+			<if test="!@Ognl@isEmpty(search.marketSeq)">
+				AND sub.market_seq = #{search.marketSeq} :: Integer
+			</if>
+			<if test="!@Ognl@isEmpty(search.storeName)">
+				AND sub.store_name LIKE CONCAT('%', #{search.storeName},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.ctnNo)">
+				AND sub.ctn_no LIKE CONCAT('%', #{search.ctnNo},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.modelNo)">
+				AND sub.model_no LIKE CONCAT('%', #{search.modelNo},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.productNo)">
+				AND sub.product_no LIKE CONCAT('%', #{search.productNo},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.fireDetectorStatus)">
+				AND sub.fireDetectorStatus = #{search.fireDetectorStatus}
+			</if>
+		</where>
+		ORDER BY sub.fire_detector_seq DESC
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.firedetector.lowbatterydetector.vo.LowBatteryDetectorVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.firedetector.lowbatterydetector.vo.LowBatteryDetectorVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+</mapper>

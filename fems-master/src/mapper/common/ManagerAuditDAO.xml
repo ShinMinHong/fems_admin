@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.common.dao.ManagerAuditDAO">
+
+	<sql id="getList_sql">
+		SELECT *
+		FROM fa_admin_audit_log
+		<where>
+			((mng_area_seq= #{me.mngAreaSeq} :: Integer) or mng_area_seq is null)
+			<if test="!@Ognl@isEmpty(search.searchManagerId)">
+			   AND manager_id like CONCAT('%',#{search.searchManagerId},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.searchMenuName)">
+			   AND menu_name like CONCAT('%',#{search.searchMenuName},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.searchActionName)">
+			   AND action_name like CONCAT('%',#{search.searchActionName},'%')
+			</if>
+			<choose>
+				<when test="!@Ognl@isEmpty(search.searchStartDate) and !@Ognl@isEmpty(search.searchEndDate)">
+					AND reg_date::date &gt;= #{search.searchStartDate}::date
+					AND reg_date::date &lt; #{search.searchEndDate}::date + interval '1 day'
+				</when>
+				<otherwise>
+					1 = 2
+				</otherwise>
+			</choose>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.ManagerAuditDT">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.ManagerAuditDT">
+		<include refid="base.pagingStart" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+	<select id="getListCount" parameterType="java.util.Map" resultType="Integer">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<select id="getManagerAuditBySeq" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.ManagerAuditDT">
+		SELECT *
+		FROM fa_admin_audit_log
+		WHERE
+			 audit_seq = #{auditSeq}
+	</select>
+
+	<insert id="insert" parameterType="java.util.Map">
+		INSERT INTO fa_admin_audit_log (menu_name, action_name, action_detail, manager_id, manager_name, mng_area_seq, reg_date)
+		VALUES (#{dt.menuName} , #{dt.actionName}, #{dt.actionDetail}, #{me.adminId}, #{me.adminName}, #{me.mngAreaSeq}, now())
+	</insert>
+</mapper>

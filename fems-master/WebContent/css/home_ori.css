@@ -1,0 +1,129 @@
+.content { position: relative; }
+.map_wrap, .map_wrap * {margin:0; padding:0;font-family:'Malgun Gothic',dotum,'돋움',sans-serif;font-size:12px;}
+
+.map_wrap a, .map_wrap a:hover, .map_wrap a:active{color:#000;text-decoration: none;}
+.map_wrap {position:absolute;width:calc(100% - 40px); height:1600px;}
+#menu_wrap {position:absolute;top:0;right:5px;bottom:0;width:340px;margin:5px 0 5px 5px;padding:5px;overflow-y:auto;overflow-x: hidden;background:rgba(255, 255, 255, 0.8);z-index: 1;font-size:12px;border-radius: 10px;}
+.bg_white {background:#fff;}
+#menu_wrap hr {display: block; width: 100%; height: 1px;border: 0; border-top: 2px solid #5F5F5F;margin:3px 0;}
+#menu_wrap .option{text-align: center;}
+#menu_wrap .option p {margin:10px 0;}
+#menu_wrap .option button {margin-left:5px;}
+
+.menu_wrap-ani { width: 100px; position:static;top:10px;left:10px;font-weight: bold;border-radius: 5px;border:1px solid #909090;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);background: #fff;overflow: hidden;z-index: 2;}
+.menu_wrap-ani.showup:after {background-image: url( "/images/map_maker/arrow_up.png" ); background-size: 24px 24px;display: inline-block;width: 24px;height: 24px;content:"";margin-top:2px;float:right;}
+.menu_wrap-ani.hidedown:after {background-image: url( "/images/map_maker/arrow_down.png"); background-size: 24px 24px;display: inline-block;width: 24px;height: 24px;content:"";margin-top:2px;float:right;}
+
+#category { width: 331px; position:static;top:10px;left:10px;font-weight: bold;border-radius: 5px;border:1px solid #909090;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);background: #fff;overflow: hidden;z-index: 2;}
+#category li {width: 110px; float:left;list-style: none;border-right:1px solid #acacac;padding:8px 0;text-align: center; cursor: pointer;}
+#category li.on {color:#ffffff;background: #2b90d9;}
+#category li:hover {background: #d9e1e8; }
+#category li.on:hover {background: #2b90d9; }
+#category li:last-child{margin-right:0;border-right:0;width:109px;}
+#category li span {display: block;margin:0 auto 3px;width:27px;height: 28px;}
+#category li .fire_protection {background-position: -10px 0;}
+#category li .iot_terminal {background-position: -10px -38px;}
+#category li .search {background-position: -10px -76px;}
+
+#category.half-size li {width: 164px;}
+#category.half-size li:last-child {width: 165px;}
+
+.placeinfo_wrap {position:absolute;bottom:45px;left:-350px;width:600px;}
+.placeinfo {position:relative;width:100%;border-radius:6px;border: 1px solid #ccc;border-bottom:2px solid #ddd;padding-bottom: 10px;background: #fff;}
+.placeinfo:nth-of-type(n) {border:0; box-shadow:0px 1px 2px #888;}
+.placeinfo_wrap .after {content:'';position:relative;margin-left:39px;left:50%;width:22px;height:12px;background:url('http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
+
+.placeinfo_wrap.horizontal {position:absolute;bottom: -280px; left: 50px;width:600px;}
+.placeinfo_wrap.horizontal .after {content: '';position: relative;margin-left: 0;left: -17px;top: -298px;width: 22px;height: 12px;background: url(http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png);transform: rotate(90deg)}
+
+.placeinfo span {margin:5px 5px 0 5px;cursor: default;font-size:13px;}
+.placeinfo .title {font-weight: bold; font-size:14px;border-radius: 6px 6px 0 0;margin: -1px -1px 0 -1px;padding:18px; color: #fff;background: #566270;}
+.placeinfo .close {position: absolute;top: 16px;right: 16px;color: #888;width: 24px;height: 24px;background: url('/images/map_maker/close_button.png');}
+.placeinfo .close:hover {cursor: pointer;}
+.placeinfo button { padding: 5px; }
+.placeinfo button i { font-family: 'icomoon'; padding: 0 0 0 5px; }
+.placeinfo .marker_normal {background:url('/images/map_maker/normal_marker_details.png') no-repeat;background-size: 32px 46px;height: 46px;float: left;}
+.placeinfo .marker_fire {background:url('/images/map_maker/fire_marker.png') no-repeat; background-size: 32px 46px;height: 46px;float: left;}
+.placeinfo .marker_fire_mix {background:url('/images/map_maker/fire_mix_marker.png') no-repeat; background-size: 32px 46px;height: 46px;float: left;}
+.placeinfo .marker_nosignal {background:url('/images/map_maker/nosignal_marker.png') no-repeat; background-size: 32px 46px;height: 46px;float: left;}
+.placeinfo .markerbg {height:42px;display: block;clear:both;padding: 5px 0 0 65px;background-color: #E0E3DA;}
+
+.placeinfo .event_fire {background:url('/images/map_maker/fire_event_square.png') no-repeat; background-size: 32px 32px;width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .active_fire {background:url('/images/map_maker/fire_active_square.png') no-repeat; background-size: 32px 32px;width: 140px;content:'';height: 32px;float: left;}
+
+.placeinfo .event_smoke {background:url('/images/map_maker/broken_event_square.png') no-repeat; background-size: 32px 32px; width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .event_temperature {background:url('/images/map_maker/main_siren_event_square.png') no-repeat; background-size: 32px 32px; width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .event_frame {background:url('/images/map_maker/local_siren_event_square.png') no-repeat; background-size: 32px 32px; width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .event_co {background:url('/images/map_maker/main_power_event_square.png') no-repeat; background-size: 32px 32px; width: 60px;content:'';height: 32px;float: left;}
+
+.placeinfo .active_smoke {background:url('/images/map_maker/broken_active_square.png') no-repeat; background-size: 32px 32px; width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .active_temperature {background:url('/images/map_maker/main_siren_active_square.png') no-repeat; background-size: 32px 32px; width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .active_frame {background:url('/images/map_maker/local_siren_active_square.png') no-repeat; background-size: 32px 32px; width: 140px;content:'';height: 32px;float: left;}
+.placeinfo .active_co {background:url('/images/map_maker/main_power_active_square.png') no-repeat; background-size: 32px 32px; width: 60px;content:'';height: 32px;float: left;}
+
+#placesList li {list-style: none;}
+#placesList .item {position:relative;border-bottom:1px solid #888;overflow:visible;cursor: pointer;min-height: 65px;}
+#placesList .item span {display: block;margin-top:4px;overflow-x: hidden;text-overflow: ellipsis;width: 260px;}
+#placesList .item h5, #placesList .item .info {text-overflow: ellipsis;overflow:visible;white-space: nowrap;font-size:14px;overflow-x: hidden;}
+#placesList .item .info{padding:10px 0 10px 55px;}
+#placesList .item .markerbg {float:left;position:absolute;width:32px; height:32px;margin:15px 0 0 5px;}
+#placesList .item .marker_normal {background:url('/images/map_maker/normal_event_square.png') no-repeat;}
+#placesList .item .marker_fire {background:url('/images/map_maker/fire_event_square.png') no-repeat;}
+#placesList .item .marker_fire_mix {background:url('/images/map_maker/fire_mix_event_square.png') no-repeat;}
+#placesList .item .marker_nosignal {background:url('/images/map_maker/nosignal_event_square.png') no-repeat;}
+.customOverlay {margin-top: -50px;}
+.customOverlay * {display: inline-block;vertical-align: top;}
+.customOverlay .left {background: url("http://t1.daumcdn.net/localimg/localimages/07/2011/map/storeview/tip_l.png") no-repeat;display: inline-block;height: 24px;overflow: hidden;vertical-align: top;width: 7px;}
+.customOverlay .center {background: url(http://t1.daumcdn.net/localimg/localimages/07/2011/map/storeview/tip_bg.png) repeat-x;display: inline-block;height: 24px;font-size: 12px;color:black;line-height: 24px;}
+.customOverlay .right {background: url("http://t1.daumcdn.net/localimg/localimages/07/2011/map/storeview/tip_r.png") -1px 0  no-repeat;display: inline-block;height: 24px;overflow: hidden;width: 6px;}
+.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th,
+.table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+	border-bottom: 1px solid #ddd;
+	border-top: 0px !important;
+}
+.al_left	{text-align:left}
+.al_right	{text-align:right}
+.al_center	{text-align:center}
+.area {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 3px;
+    font-size: 12px;
+    top: -5px;
+    left: 15px;
+    padding:2px;
+}
+.info {font-size: 12px;padding: 5px;}
+.info .title {font-weight: bold;}
+
+.menu_board {border-radius: 10px; z-index: 3;width: 250px;position: absolute;top: 5px;left: 5px;opacity: 0.9;}
+.menu_board .menu_board-first {padding: 10px;text-align: center;border-bottom: 2px dotted #b7b2b2;}
+.menu_board .menu_board-first span {font-size: 17px;font-weight: bold;}
+.menu_board .menu_board-sec {margin:  15px 15px 0 15px;}
+.menu_board .menu_board-sec ul {display: inline-block;list-style: none;}
+.menu_board .menu_board-sec ul li {padding-bottom: 5px;height: 41px;}
+.menu_board .menu_board-sec ul li span {font-size:15px;}
+.menu_board .menu_board-sec ul li div {font-size:15px;padding-top:5px;}
+.menu_board .menu_board-sec ul li div span:first-child {padding-left:10px;}
+.menu_board .menu_board-sec ul li .marker_fire:before {background-image: url("/images/map_maker/fire_marker.png"); background-size: 24px 34px;display: inline-block;width: 24px;height: 34px;content:"";}
+.menu_board .menu_board-total {height: 45px;border-top: 2px dotted #b7b2b2;}
+.menu_board .menu_board-total span {font-size:15px;padding: 10px 20px 0px 20px;}
+.float-l {float:left}
+.float-r {float:right}
+
+.breadcrumb-line{ float: right; z-index: 10; background-color: transparent; border-bottom: none; width:210PX; padding: 15px 0px 0px 0;}
+.breadcrumb-line .visibleboard { margin: 0px !important; font-size: 14px; text-align: right; }
+
+#fireAlertPopupForm {text-align: center;}
+.ui-dialog-titlebar-close {position: absolute;top:0px;right:0px;color: #888;width: 72px;height: 72px;background: url('/images/map_maker/close_button.png');}
+.ui-dialog-titlebar-close:after {width: 48px;font-size: 48px;margin-top: -9px;margin-left: 15px}
+
+input[type=checkbox]
+{
+  -ms-transform: scale(1.3); /* IE */
+  -moz-transform: scale(1.3); /* FF */
+  -webkit-transform: scale(1.3); /* Safari and Chrome */
+  -o-transform: scale(1.3); /* Opera */
+  padding: 10px;
+}

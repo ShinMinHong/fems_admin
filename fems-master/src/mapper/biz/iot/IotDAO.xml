@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper	namespace="com.firealarm.admin.biz.iot.dao.IotDAO">
+	<!-- 권한그룹코드 MAP -->
+	<select id="getDetectorAndInstallInfoByCtnNo" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.iot.vo.DetectorInstallInfoDT">
+		SELECT
+			MA.mng_area_seq
+			, MA.mng_area_name
+			, MA.alarm_store
+			, MA.alarm_market
+			, MA.alarm_area
+			, MA.no_alarm_time
+			, M.market_seq
+			, M.market_name
+			, M.ctrd_code
+			, M.signgu_code
+			, M.dong_code
+			, M.li_code
+			, S.store_seq
+			, S.store_name
+			, S.manager_name
+			, S.phone_no
+			, S.zip_code
+			, S.road_address
+			, S.parcel_address
+			, S.sms_alarm_yn
+			, S.firestation_alarm_yn
+			, S.smoke_alarm_yn
+			, FD.fire_detector_seq
+			, FD.ctn_no
+			, FD.install_place
+			, FD.fire_detector_name
+			, FD.sms_add_message
+		FROM
+			fa_fire_detector FD
+			, fa_store S
+			, fa_market M
+			, fa_mng_area MA
+		WHERE
+			FD.ctn_no = #{ctnNo}
+			AND FD.store_seq = S.store_seq
+			and S.market_seq = M.market_seq
+			and M.mng_area_seq = MA.mng_area_seq
+	</select>
+</mapper>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 통계용 스케쥴 DAO -->
+<mapper namespace="com.firealarm.admin.systemschedule.dao.StatScheduleDAO">
+	<!-- 일별 화재감지기 이벤트 통계 함수 실행  -->
+	<select id="execFireDetectorEventStatsFunc" resultType="java.lang.String">
+		select fa_fire_detector_event_stats()
+	</select>
+</mapper>

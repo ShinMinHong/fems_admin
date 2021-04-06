@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Home DAO -->
+<mapper namespace="com.firealarm.admin.biz.home.dao.HomeDAO">
+	<!-- 해당 관제지역의 관제지도 초기 데이터 조회 -->
+	<select id="getMngAreaMapInitInfo" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapInitConfVO">
+		SELECT
+			latitude
+			, longitude
+			, scale
+		FROM
+			fa_mng_area
+		WHERE
+		 	mng_area_seq = #{mngAreaSeq}
+	</select>
+
+	<!-- 해당 시장의 관제지도 초기 데이터 조회 -->
+	<select id="getMarketMapInitInfo" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapInitConfVO">
+		SELECT
+			latitude
+			, longitude
+			, scale
+		FROM
+			fa_market
+		WHERE
+		 	mng_area_seq = #{mngAreaSeq}
+		 	and market_seq = #{marketSeq}
+	</select>
+
+	<!-- 지도에 표시할 시장목록을 조회 -->
+	<select id="getMapMarketInfoList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapMarketVO">
+		SELECT
+			market_seq
+			, market_name
+			, latitude
+			, longitude
+			, scale
+		FROM
+			fa_market
+		WHERE
+		 	mng_area_seq = #{mngAreaSeq}
+		 	<if test="!@Ognl@isEmpty(marketSeq)">
+		 	and market_seq = #{marketSeq}
+		 	</if>
+		ORDER BY
+			market_name ASC
+	</select>
+
+	<!-- 지도에 표시할 상점목록을 조회 -->
+	<select id="getMapFireDetectorList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapFireDetectorVO">
+		SELECT
+			S.store_seq
+			, S.store_name
+			, S.market_seq
+			, M.market_name
+			, S.mng_area_seq
+			, D.fire_detector_seq
+			, D.ctn_no
+			, D.latitude
+			, D.longitude
+			, DNS.alarm_fire
+			, DNS.not_fire_yn
+			, DNS.battery_value
+			, DNS.battery2_value
+			, CASE
+				WHEN (DNS.last_updt_dt &lt; now() - interval '73hour') then true
+				ELSE false
+			  END AS no_signal
+		FROM
+			fa_fire_detector D
+			, fa_fire_detector_now_status DNS
+			, fa_store S
+			, fa_market M
+		WHERE
+			D.fire_detector_seq = DNS.fire_detector_seq
+	 		AND D.store_seq = S.store_seq
+	 		AND S.market_seq = M.market_seq
+		 	AND S.mng_area_seq = #{mngAreaSeq}
+		 	<if test="!@Ognl@isEmpty(marketSeq)">
+		 	AND S.market_seq = #{marketSeq}
+		 	</if>
+		ORDER BY
+			D.fire_detector_seq ASC
+	</select>
+
+	<!-- 지도에서 주기적으로 호출하는, 이벤트 상태의 목록을 전달  -->
+	<select id="getStatusListInEvent" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.FireDetectorNowStatusVO">
+		SELECT
+			D.fire_detector_seq
+			, DNS.alarm_fire
+			, DNS.not_fire_yn
+			, DNS.battery_value
+			, DNS.battery2_value
+			, CASE
+				WHEN (DNS.last_updt_dt &lt; now() - interval '73hour') then true
+				ELSE false
+			  END AS no_signal
+		FROM
+			fa_fire_detector D
+			, fa_fire_detector_now_status DNS
+			, fa_store S
+		where
+			D.fire_detector_seq = DNS.fire_detector_seq
+	 		AND D.store_seq = S.store_seq
+		 	AND S.mng_area_seq = #{mngAreaSeq}
+		 	<if test="!@Ognl@isEmpty(marketSeq)">
+	 			AND S.market_seq = #{marketSeq}
+		 	</if>
+		 	AND
+		 	(
+		 		DNS.alarm_fire = true
+		 		OR DNS.battery_value &lt; 20
+				OR DNS.battery2_value &lt; 20
+				OR DNS.last_updt_dt &lt; (now() - interval '73hour')
+		 	)
+		ORDER BY
+			D.fire_detector_seq ASC;
+	</select>
+</mapper>

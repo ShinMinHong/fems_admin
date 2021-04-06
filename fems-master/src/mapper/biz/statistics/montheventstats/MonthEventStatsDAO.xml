@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.biz.statistics.montheventstats.dao.MonthEventStatsDAO">
+	<sql id="getList_sql">
+		SELECT
+			concat(sub.mm::text,'월') mm,
+			coalesce(sum(sub.smoke_count),0) as smoke_count,
+			coalesce(sum(sub.temperature_count),0) as temperature_count,
+			coalesce(sum(sub.flame_count),0) as flame_count,
+			coalesce(sum(sub.co_count),0) as co_count,
+			coalesce(sum(sub.smoke_count)+sum(sub.temperature_count)+sum(sub.flame_count)+sum(sub.co_count),0) as row_sum
+		FROM
+			(
+			SELECT
+				MontList.mm,
+				coalesce (smoke_count,0) as smoke_count,
+				coalesce (temperature_count,0) as temperature_count,
+				coalesce (flame_count,0) as flame_count,
+				coalesce(co_count, 0) as co_count
+			FROM
+				(
+					SELECT * FROM fa_fire_detector_stats
+					<where>
+						mng_area_seq = #{me.mngAreaSeq}
+			      		<if test="!@Ognl@isEmpty(search.marketSeq)">
+			    			AND market_seq = #{search.marketSeq} :: Integer
+						</if>
+						<if test="!@Ognl@isEmpty(search.regDate)">
+			    			AND to_char(reg_date,'YYYY') = #{search.regDate}
+						</if>
+					</where>
+				 ) stat
+			INNER JOIN (
+						SELECT
+							area.mng_area_seq,
+							area.mng_area_name,
+							market.market_seq,
+							market.market_name
+						FROM
+							fa_market market
+							INNER JOIN fa_mng_area area ON market.mng_area_seq = area.mng_area_seq
+						<where>
+							market.mng_area_seq = #{me.mngAreaSeq}
+						</where>
+						) faName ON stat.mng_area_seq = faName.mng_area_seq
+								   AND stat.market_seq = faName.market_seq
+			RIGHT JOIN ( SELECT generate_series(1, 12) mm ) MontList on MontList.mm = extract(month from stat.reg_date)
+		) sub
+		GROUP BY sub.mm
+		ORDER BY sub.mm
+	</sql>
+
+	<!-- 모든 점포 화재 이벤트 목록 조회  -->
+	<select id="getMonthEventStatsListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.statistics.montheventstats.vo.MonthEventStatsVO">
+		<include refid="getList_sql" />
+	</select>
+
+</mapper>

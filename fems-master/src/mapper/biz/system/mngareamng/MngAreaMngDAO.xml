@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 관제지역관리 DAO -->
+<mapper namespace="com.firealarm.admin.biz.system.mngareamng.dao.MngAreaMngDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			*
+		FROM
+			fa_mng_area
+		<where>
+			<if test="!@Ognl@isEmpty(search.mngAreaSeq)">
+			   AND mng_area_seq = #{search.mngAreaSeq}
+			</if>
+			<if test="!@Ognl@isEmpty(search.mngAreaName)">
+			   AND mng_area_name LIKE CONCAT('%',#{search.mngAreaName},'%')
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.mngareamng.vo.MngAreaMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.mngareamng.vo.MngAreaMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<select id="getByMngAreaSeq" parameterType="Long" resultType="com.firealarm.admin.biz.system.mngareamng.vo.MngAreaMngVO">
+	<![CDATA[
+		SELECT *
+		FROM fa_mng_area
+		WHERE mng_area_seq = #{mngAreaSeq}
+	]]>
+	</select>
+
+	<select id="getByMngAreaName" parameterType="String" resultType="com.firealarm.admin.biz.system.mngareamng.vo.MngAreaMngVO">
+	<![CDATA[
+		SELECT *
+		FROM fa_mng_area
+		WHERE mng_area_name = #{mngAreaName}
+		LIMIT 1
+	]]>
+	</select>
+
+	<insert id="insert" parameterType="com.firealarm.admin.biz.system.mngareamng.vo.MngAreaMngActiveVO">
+		INSERT INTO fa_mng_area
+				(
+					mng_area_name
+					, manager_name
+					, phone_no
+					, telephone_no
+					, zip_code
+					, road_address
+					, parcel_address
+					, latitude
+					, longitude
+					, scale
+					, no_alarm_time
+					, alarm_store
+					, alarm_market
+					, alarm_area
+					, reg_admin_id
+					, upd_admin_id
+				)
+		values  (
+					#{mngAreaName}
+					, #{managerName}
+					, #{phoneNo}
+					, #{telephoneNo}
+					, #{zipCode}
+					, #{roadAddress}
+					, #{parcelAddress}
+					, #{latitude}
+					, #{longitude}
+					, #{scale}
+					, #{noAlarmTime}
+					, #{alarmStore}
+					, #{alarmMarket}
+					, #{alarmArea}
+					, #{regAdminId}
+					, #{regAdminId}
+				)
+	</insert>
+
+	<update id="update" parameterType="com.firealarm.admin.biz.system.mngareamng.vo.MngAreaMngActiveVO">
+		UPDATE fa_mng_area
+			SET
+				mng_area_name = #{mngAreaName}
+				, manager_name = #{managerName}
+				, phone_no = #{phoneNo}
+				, telephone_no = #{telephoneNo}
+				, zip_code = #{zipCode}
+				, road_address = #{roadAddress}
+				, parcel_address = #{parcelAddress}
+				, latitude = #{latitude}
+				, longitude = #{longitude}
+				, scale = #{scale}
+				, no_alarm_time = #{noAlarmTime}
+				, alarm_store = #{alarmStore}
+				, alarm_market = #{alarmMarket}
+				, alarm_area = #{alarmArea}
+				, upd_date = now()
+				, upd_admin_id = #{updAdminId}
+		WHERE mng_area_seq = #{mngAreaSeq}
+	</update>
+
+	<delete id="delete" parameterType="java.util.Map">
+		DELETE FROM fa_mng_area
+		WHERE mng_area_seq = #{mngAreaSeq}
+	</delete>
+</mapper>

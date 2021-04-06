@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper	namespace="com.firealarm.admin.common.dao.StoreNoAlarmDAO">
+	<!-- 특정 Store의 noAlarm 설정 목록을 조회 -->
+	<select id="getByStoreSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.StoreNoAlarmDT">
+		SELECT
+			*
+		 FROM
+			fa_store_no_alarm
+		 WHERE
+		 	store_seq = #{storeSeq}
+	</select>
+</mapper>

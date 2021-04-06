@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper	namespace="com.firealarm.admin.common.dao.AdminDAO">
+	<!-- SMS 수신동의된 통합 관리자 목록 조회 -->
+	<select id="getSmsRecieveHqAdmin" resultType="com.firealarm.admin.security.vo.AdminDT">
+		SELECT
+			*
+		 FROM
+			fa_admin
+		 WHERE
+		 	rolegroup_code = 'HQ_ADMIN'
+		 	AND sms_receive_yn = true
+		 	AND use_yn = true
+	</select>
+
+	<!-- SMS 수신동의된 관제지역 관리자 목록 조회 -->
+	<select id="getSmsRecieveMngAreaAdminByMngAreaSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.security.vo.AdminDT">
+		SELECT
+			*
+		 FROM
+			fa_admin
+		 WHERE
+		 	mng_area_seq = #{mngAreaSeq}
+		 	AND market_seq is null
+		 	AND sms_receive_yn = true
+		 	AND use_yn = true
+	</select>
+
+	<!-- SMS 수신동의된 시장 관리자 목록 조회 -->
+	<select id="getSmsRecieveMarketAdminByMngAreaSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.security.vo.AdminDT">
+		SELECT
+			*
+		 FROM
+			fa_admin
+		 WHERE
+		 	market_seq = #{marketSeq}
+		 	AND sms_receive_yn = true
+		 	AND use_yn = true
+	</select>
+</mapper>

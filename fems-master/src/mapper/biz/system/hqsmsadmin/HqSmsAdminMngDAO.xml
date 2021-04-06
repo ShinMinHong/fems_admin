@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 통합SMS수신자 DAO -->
+<mapper namespace="com.firealarm.admin.biz.system.hqsmsadmin.dao.HqSmsAdminMngDAO">
+
+	<sql id="getList_sql">
+	  	SELECT
+			*
+		FROM
+			fa_sms_admin
+		<where>
+			<if test="!@Ognl@isEmpty(search)">
+				<if test="!@Ognl@isEmpty(search.smsReceiveYn)">
+					AND sms_receive_yn = #{search.smsReceiveYn}::bool
+				</if>
+				<if test="!@Ognl@isEmpty(search.adminName)">
+					AND admin_name LIKE CONCAT('%', #{search.adminName},'%')
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.hqsmsadmin.vo.HqSmsAdminMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.hqsmsadmin.vo.HqSmsAdminMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<!-- 상세  -->
+	<select id="getSmsAdminDetailsBySmsAdminSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.hqsmsadmin.vo.HqSmsAdminMngVO">
+		SELECT
+			*
+		FROM
+			fa_sms_admin
+	 	<where>
+		 	sms_admin_seq = #{smsAdminSeq}
+		 </where>
+	</select>
+
+	<!-- 등록 -->
+	<insert id="insert" parameterType="java.util.Map">
+		INSERT
+			INTO fa_sms_admin
+				(
+					admin_name,
+					duty_name,
+					phone_no,
+					sms_receive_yn,
+					reg_date,
+					reg_admin_id,
+					upd_date,
+					upd_admin_id
+				)
+			VALUES
+				(
+					#{vo.adminName},
+					#{vo.dutyName},
+					#{vo.phoneNo},
+					#{vo.smsReceiveYn},
+					now(),
+					#{vo.regAdminId},
+					now(),
+					#{vo.regAdminId}
+				)
+	</insert>
+
+	<!-- 수정 -->
+	<update id="update" parameterType="java.util.Map">
+		UPDATE fa_sms_admin
+		   SET
+			admin_name = #{vo.adminName},
+			duty_name = #{vo.dutyName},
+			phone_no = #{vo.phoneNo},
+			sms_receive_yn = #{vo.smsReceiveYn},
+			upd_date = now(),
+			upd_admin_id = #{vo.updAdminId}
+	  	 <where>
+	  	 	sms_admin_seq = #{vo.smsAdminSeq}
+	  	 </where>
+	</update>
+
+	<!-- 삭제  -->
+	<delete id="delete" parameterType="java.util.Map">
+		DELETE FROM
+			fa_sms_admin
+		<where>
+		 	sms_admin_seq = #{smsAdminSeq}
+		</where>
+	</delete>
+</mapper>

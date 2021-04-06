@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 회원 관리 DAO -->
+<mapper namespace="com.firealarm.admin.common.dao.UserDAO">
+
+	<!-- 사용자정보테이블에 최종접속일시 업데이트 -->
+	<update id="updateLastLoginDate" parameterType="java.util.Map">
+		UPDATE
+			fa_admin
+		SET
+			password_fail_co = 0
+			, last_login_date = NOW()
+		WHERE
+		 	admin_seq = #{adminSeq}
+	</update>
+
+	<!-- 로그인로그정보테이블에 로그인 로그 등록 -->
+	<insert id="insertLoginLog" parameterType="java.util.Map">
+		INSERT
+			INTO fa_login_log
+				(
+				admin_seq,
+				rolegroup_code,
+				mng_area_seq,
+				market_seq,
+				admin_id,
+				admin_name,
+				duty_name,
+				login_date
+				)
+			SELECT
+				admin_seq,
+				rolegroup_code,
+				mng_area_seq,
+				market_seq,
+				admin_id,
+				admin_name,
+				duty_name,
+				now()
+			FROM
+				fa_admin
+			WHERE
+				admin_seq = #{adminSeq}
+	</insert>
+
+	<!-- 기존비밀번호 획득 -->
+	<select id="getOldPassword" parameterType="java.util.Map" resultType="String">
+		SELECT
+			admin_password
+		 FROM
+			fa_admin
+		 WHERE
+		 	admin_id = #{adminId}
+	</select>
+
+	<!-- 비밀번호변경 -->
+	<update id="updatePassword" parameterType="java.util.Map">
+		UPDATE
+			fa_admin
+		SET
+			admin_password = #{adminPassword},
+			last_pw_change_dt = now(),
+			password_fail_co = 0
+		WHERE
+		 	admin_id = #{adminId}
+	</update>
+
+	<!-- 비밀번호변경이력 등록 -->
+	<insert id="insertPwdChangeLog" parameterType="java.util.Map">
+		INSERT
+			INTO fa_pw_change_log
+				(
+				pw_change_dt,
+				admin_seq,
+				admin_id,
+				admin_name,
+				duty_name
+				)
+			VALUES
+				(
+				now(),
+				#{adminSeq},
+				#{adminId},
+				#{adminName},
+				#{dutyName}
+				)
+	</insert>
+
+	<!-- 로그인 실패 카운트 증가 처리 -->
+	<update id="setPasswordFailCo" parameterType="java.util.Map">
+		UPDATE
+			fa_admin
+		SET
+			password_fail_co = (select max(password_fail_co) + 1 from fa_admin where admin_id = #{adminId})
+		WHERE
+		 	admin_id = #{adminId}
+	</update>
+</mapper>

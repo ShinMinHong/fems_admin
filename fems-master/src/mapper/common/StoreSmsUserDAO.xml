@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper	namespace="com.firealarm.admin.common.dao.StoreSmsUserDAO">
+	<!-- 특정 Store의 SMS 수신동의 대상자 정보 조회 -->
+	<select id="getReceiveAcceptListByStoreSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.StoreSmsUserDT">
+		SELECT
+			SSU.*, A.manager_name
+		FROM
+			fa_store_sms_user AS SSU
+			inner join fa_store AS S on S.store_seq = SSU.store_seq
+			inner join fa_mng_area AS A on A.mng_area_seq = S.mng_area_seq
+		 WHERE
+		 	SSU.store_seq = #{storeSeq}
+		 	AND SSU.sms_receive_yn = true
+	</select>
+</mapper>

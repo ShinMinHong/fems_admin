@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 접속정보이력 DAO -->
+<mapper namespace="com.firealarm.admin.biz.areasystem.loginhistory.dao.LoginHistoryDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			*
+	    FROM
+			fa_login_log
+			<where>
+				<!-- HQADMIN 포함  -->
+				((mng_area_seq= #{me.mngAreaSeq} :: Integer) or mng_area_seq is null)
+					<if test="!@Ognl@isEmpty(search.rolegroupCode)">
+						AND rolegroup_code = #{search.rolegroupCode}
+					</if>
+					<if test="!@Ognl@isEmpty(search.adminId)">
+						AND admin_id LIKE CONCAT('%',#{search.adminId},'%')
+					</if>
+					<if test="!@Ognl@isEmpty(search.adminName)">
+						AND admin_name LIKE CONCAT('%',#{search.adminName},'%')
+					</if>
+		     		AND login_date::date &gt;= #{search.startDate}::date
+		     		AND login_date::date &lt; #{search.endDate}::date + interval '1 day'
+			</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.loginhistory.vo.LoginHistoryVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.loginhistory.vo.LoginHistoryVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+</mapper>

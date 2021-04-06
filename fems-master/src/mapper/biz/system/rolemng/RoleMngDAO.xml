@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 권한코드관리 DAO -->
+<mapper namespace="com.firealarm.admin.biz.system.rolemng.dao.RoleMngDAO">
+
+	<select id="getRoleGroupList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolegroupmng.vo.RoleGroupMngVO">
+		SELECT
+			*
+		FROM
+	  		fa_rolegroup
+	</select>
+
+	<sql id="getList_sql">
+		SELECT
+			*
+		FROM
+			fa_role
+		<where>
+			<if test="!@Ognl@isEmpty(search.roleCode)">
+			   AND role_code LIKE CONCAT('%',#{search.roleCode},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.roleName)">
+			   AND role_name  LIKE CONCAT('%',#{search.roleName},'%')
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolemng.vo.RoleMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolemng.vo.RoleMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<resultMap id="getDetailsPageResultMap" type="com.firealarm.admin.biz.system.rolemng.vo.RoleMngDetailsVO" autoMapping="true">
+		<result property="roleCode" column="role_code" />
+		<collection property="roleDetailsList" column="{roleCode=role_code}" javaType="ArrayList" ofType="com.firealarm.admin.biz.system.rolemng.vo.RoleMngRoleDetailsVO" select="getRoleDetailsListByRoleCode"/>
+	</resultMap>
+
+	<select id="getDetailsPageByRoleCode" parameterType="java.util.Map" resultMap="getDetailsPageResultMap">
+		SELECT
+			*
+		FROM
+			fa_role
+		WHERE
+			 role_code= #{roleCode}
+	</select>
+
+	<select id="getRoleDetailsListByRoleCode" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolemng.vo.RoleMngRoleDetailsVO">
+	    SELECT
+	    	RR.rolegroup_code,
+	    	RR.rolegroup_name,
+		    (CASE
+		        WHEN RRR.rolegroup_code IS NOT NULL THEN 1 ELSE 0
+			END) CHECKED
+		FROM
+	    	fa_roleGROUP as RR
+			LEFT JOIN fa_roleGROUP_role as RRR
+			ON RR.rolegroup_code = RRR.rolegroup_code
+            AND RRR.role_code = #{roleCode}
+	</select>
+
+	<select id="getByRole" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.system.rolemng.vo.RoleMngVO">
+		SELECT
+			*
+		FROM
+			fa_role
+		WHERE
+			 role_code = #{roleCode}
+	</select>
+
+	<insert id="insertRolegroupRole" parameterType="java.util.Map">
+		INSERT INTO
+			fa_roleGROUP_role( rolegroup_code, role_code, reg_date )
+		VALUES
+			( #{rolegroupCode}, #{roleCode}, now() )
+	</insert>
+
+	<!-- 권한  등록  -->
+	<insert id="insertRole" parameterType="java.util.Map" >
+	INSERT INTO
+		fa_role(role_code, role_name, reg_date, reg_admin_id)
+	VALUES
+		(#{roleCode}, #{roleName}, now(), #{regAdminId} )
+	</insert>
+
+	<!--  권한 - 권한그룹 단건 등록  -->
+	<insert id="insertDataRoleRoleGroup" parameterType="java.util.Map">
+		INSERT INTO
+			fa_roleGROUP_role(rolegroup_code, role_code, reg_date, reg_admin_id)
+		VALUES
+			(#{rolegroupCode}, #{roleCode}, now(),#{regAdminId})
+	</insert>
+
+	<update id="updateRole" parameterType="java.util.Map">
+		UPDATE
+			fa_role
+		SET
+			role_name=#{roleName}
+		WHERE
+			role_code = #{roleCode}
+	</update>
+
+	<delete id="deleteRole" parameterType="java.util.Map">
+		DELETE FROM fa_role
+		WHERE role_code = #{roleCode}
+	</delete>
+
+	<delete id="deleteRolegroupRole" parameterType="java.util.Map">
+		DELETE FROM
+			fa_roleGROUP_role
+		WHERE role_code = #{roleCode}
+	</delete>
+
+</mapper>

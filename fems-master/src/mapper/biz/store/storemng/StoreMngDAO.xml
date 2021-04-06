@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.biz.store.storemng.dao.StoreMngDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			area.mng_area_name,
+			market.market_name,
+			store.*
+		FROM
+			fa_store store
+			INNER JOIN fa_mng_area area ON store.mng_area_seq = area.mng_area_seq
+			INNER JOIN fa_market market ON store.market_seq = market.market_seq
+		<where>
+			store.mng_area_seq = #{me.mngAreaSeq}
+			<if test="!@Ognl@isEmpty(search.marketSeq)">
+			   AND store.market_seq = #{search.marketSeq} :: Integer
+			</if>
+			<if test="!@Ognl@isEmpty(search.storeName)">
+			   AND store.store_name LIKE CONCAT('%',#{search.storeName},'%')
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.store.storemng.vo.StoreMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<!-- 점포 목록  -->
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.store.storemng.vo.StoreMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<!-- 상세  -->
+	<select id="getByStoreSeq" parameterType="java.util.Map" resultMap="getDetailsResultMap">
+		SELECT
+			area.mng_area_name,
+			market.market_name,
+			market.firestation_name,
+			market.firestation_manager_name,
+			market.firestation_telephone_no,
+			store.*,
+			noalarm.*
+		FROM
+			fa_store store
+			INNER JOIN fa_mng_area area ON store.mng_area_seq = area.mng_area_seq
+			INNER JOIN fa_market market ON store.market_seq = market.market_seq
+			INNER JOIN fa_store_no_alarm noalarm ON store.store_seq = noalarm.store_seq
+		<where>
+		 	store.store_seq = #{storeSeq}
+		</where>
+	</select>
+
+	<resultMap id="getDetailsResultMap" type="com.firealarm.admin.biz.store.storemng.vo.StoreMngActiveVO" autoMapping="true">
+		<result property="storeSeq" column="store_seq" />
+		<collection property="storeSmsUserList" column="{storeSeq=store_seq}" javaType="ArrayList" ofType="com.firealarm.admin.biz.store.storemng.vo.StoreSmsUserList" select="getStoreSmsUserList"/>
+	</resultMap>
+
+	<select id="getStoreSmsUserList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.store.storemng.vo.StoreSmsUserList">
+			SELECT
+	 			(row_number() over()) as rn ,
+	    		*
+			FROM fa_store_sms_user
+			WHERE store_seq = #{storeSeq}
+	</select>
+
+	<!-- 등록 -->
+	<insert id="insert" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="vo.storeSeq">
+		INSERT INTO fa_store
+				(
+					mng_area_seq,
+					market_seq,
+					store_name,
+					manager_name,
+					phone_no,
+					telephone_no,
+					zip_code,
+					road_address,
+					parcel_address,
+					details_address,
+					business_desc,
+					sms_alarm_yn,
+					firestation_alarm_yn,
+					reg_admin_id
+				)
+			VALUES
+				(
+					#{me.mngAreaSeq},
+					#{vo.marketSeq},
+					#{vo.storeName},
+					#{vo.managerName},
+					#{vo.phoneNo},
+					#{vo.telephoneNo},
+					#{vo.zipCode},
+					#{vo.roadAddress},
+					#{vo.parcelAddress},
+					#{vo.detailsAddress},
+					#{vo.businessDesc},
+					#{vo.smsAlarmYn},
+					#{vo.firestationAlarmYn},
+					#{me.adminId}
+				)
+	</insert>
+	<!-- 점포알림제한정보 등록 -->
+	<insert id="insertStoreNoAlarm" parameterType="java.util.Map">
+		INSERT INTO fa_store_no_alarm (
+			store_seq
+		) VALUES (
+			#{storeSeq}
+		)
+	</insert>
+
+	<!-- 삭제  -->
+	<delete id="delete" parameterType="java.util.Map">
+		DELETE FROM
+			fa_store
+		<where>
+		 	store_seq = #{storeSeq}
+		 </where>
+	</delete>
+
+	<!-- 수정 -->
+	<update id="update" parameterType="java.util.Map">
+		UPDATE fa_store
+		   SET
+		    store_name = #{vo.storeName},
+			manager_name = #{vo.managerName},
+			phone_no = #{vo.phoneNo},
+			telephone_no = #{vo.telephoneNo},
+			zip_code = #{vo.zipCode},
+			road_address = #{vo.roadAddress},
+			parcel_address = #{vo.parcelAddress},
+			details_address = #{vo.detailsAddress},
+			business_desc = #{vo.businessDesc},
+			sms_alarm_yn = #{vo.smsAlarmYn},
+			firestation_alarm_yn = #{vo.firestationAlarmYn},
+			smoke_alarm_yn = #{vo.smokeAlarmYn},
+			upd_date = now(),
+			upd_admin_id = #{me.adminId}
+	  	 <where>
+	  	 	store_seq = #{vo.storeSeq}
+	  	 </where>
+	</update>
+
+	<!-- 점포 알림제한시간정보 수정 -->
+	<update id="updateStoreNoAlarm" parameterType="java.util.Map">
+		UPDATE fa_store_no_alarm
+		   SET
+		   	no_alarm_00 = #{vo.noAlarm00},
+		    no_alarm_01 = #{vo.noAlarm01},
+		    no_alarm_02 = #{vo.noAlarm02},
+		    no_alarm_03 = #{vo.noAlarm03},
+		    no_alarm_04 = #{vo.noAlarm04},
+		    no_alarm_05 = #{vo.noAlarm05},
+		    no_alarm_06 = #{vo.noAlarm06},
+		    no_alarm_07 = #{vo.noAlarm07},
+		    no_alarm_08 = #{vo.noAlarm08},
+		    no_alarm_09 = #{vo.noAlarm09},
+		    no_alarm_10 = #{vo.noAlarm10},
+		    no_alarm_11 = #{vo.noAlarm11},
+		    no_alarm_12 = #{vo.noAlarm12},
+		    no_alarm_13 = #{vo.noAlarm13},
+		    no_alarm_14 = #{vo.noAlarm14},
+		    no_alarm_15 = #{vo.noAlarm15},
+		    no_alarm_16 = #{vo.noAlarm16},
+		    no_alarm_17 = #{vo.noAlarm17},
+		    no_alarm_18 = #{vo.noAlarm18},
+		    no_alarm_19 = #{vo.noAlarm19},
+		    no_alarm_20 = #{vo.noAlarm20},
+		    no_alarm_21 = #{vo.noAlarm21},
+		    no_alarm_22 = #{vo.noAlarm22},
+		    no_alarm_23 = #{vo.noAlarm23},
+			upd_date = now(),
+			upd_admin_id = #{me.adminId}
+	  	 <where>
+	  	 	store_seq = #{vo.storeSeq}
+	  	 </where>
+	</update>
+
+	<!-- 전통시장고유번호,점포명으로 점포 고유번호 조회  -->
+	<select id="findStoreSeqByID" parameterType="java.util.Map" resultType="Long">
+		SELECT
+			store_seq
+		FROM
+			fa_store store
+		WHERE
+			market_seq = #{marketSeq}
+			AND store_name=#{storeName}
+	</select>
+
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper	namespace="com.firealarm.admin.common.dao.SmsSendLogDAO">
+	<!-- 특정시간동안 해당 Store에 발송된 SMS 갯수 조회 -->
+	<select id="getListCountByConditionAndDuraion" parameterType="java.util.Map" resultType="int">
+		<![CDATA[
+			select
+				count(*) cnt
+			from
+				fa_sms_send_log
+			where
+				store_seq = #{storeSeq}
+				and send_date::timestamp >= (now()::timestamp - #{durationMin}::interval )
+		]]>
+	</select>
+
+	<!-- SMS 발송 로그 목록을 fa_fire_detector_log에 Insert All -->
+	<insert id="insertAll" parameterType="com.firealarm.admin.common.vo.SmsSendLogDT">
+            INSERT INTO fa_sms_send_log (mng_area_seq, mng_area_name, market_seq
+									, market_name, store_seq, store_name
+									, sms_user_type, receive_user_nm, receive_phone_no
+									, sms_title, sms_message, send_date)
+                             VALUES
+                            	<foreach collection="list" item="item" separator=", " close=";">
+									(#{item.mngAreaSeq}, #{item.mngAreaName}, #{item.marketSeq}
+									, #{item.marketName}, #{item.storeSeq}, #{item.storeName}
+									, #{item.smsUserType}, #{item.receiveUserNm}, #{item.receivePhoneNo}
+									, #{item.smsTitle}, #{item.smsMessage}, now())
+								</foreach>
+	</insert>
+</mapper>

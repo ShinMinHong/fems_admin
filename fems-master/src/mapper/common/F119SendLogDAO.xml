@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper	namespace="com.firealarm.admin.common.dao.F119SendLogDAO">
+
+	<!-- SMS 발송 로그 목록을 fa_fire_detector_log에 Insert All -->
+	<insert id="insert" parameterType="java.util.Map"  useGeneratedKeys="true" keyProperty="dt.f119SendLogSeq">
+		INSERT INTO fa_f119_send_log
+			( mng_area_seq,
+				market_seq,
+				store_seq,
+				sttemnt_ty_code,
+				sttemnt_ty_detail_code,
+				sttemnt_cn,
+				call_name,
+				call_tel,
+				aplcnt_nm,
+				aplcnt_telno,
+				addr_ty,
+				ctrd_code,
+				signgu_code,
+				dong_code,
+				li_code,
+				atchmnfl_at,
+				msfrtn_kn_code,
+				location,
+				send_date )
+		VALUES
+			( #{dt.mngAreaSeq},
+				#{dt.marketSeq},
+				#{dt.storeSeq},
+				#{dt.sttemntTyCode},
+				#{dt.sttemntTyDetailCode},
+				#{dt.sttemntCn},
+				#{dt.callName},
+				#{dt.callTel},
+				#{dt.aplcntNm},
+				#{dt.aplcntTelno},
+				#{dt.addrTy},
+				#{dt.ctrdCode},
+				#{dt.signguCode},
+				#{dt.dongCode},
+				#{dt.liCode},
+				#{dt.atchmnflAt},
+				#{dt.msfrtnKnCode},
+				#{dt.location},
+				now() )
+	</insert>
+
+	<update id="updateResult" parameterType="java.util.Map">
+		UPDATE fa_f119_send_log
+			SET
+				send_result = #{sendResult}
+			WHERE
+				f119_send_log_seq = #{f119SendLogSeq}
+	</update>
+</mapper>

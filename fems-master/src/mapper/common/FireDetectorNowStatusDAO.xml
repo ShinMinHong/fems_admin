@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 단말기 현재상태 DAO -->
+<mapper namespace="com.firealarm.admin.common.dao.FireDetectorNowStatusDAO">
+	<select id="getByDetectorSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.FireDetectorNowStatusDT">
+		SELECT
+			*,
+			CASE
+				WHEN (last_updt_dt &lt; now() - interval '73hour') then true
+				ELSE false
+			END AS no_signal
+		FROM
+			fa_fire_detector_now_status
+		WHERE
+		 	fire_detector_seq = #{fireDetectorSeq}
+	</select>
+
+	<insert id="insert" parameterType="java.util.Map">
+		INSERT INTO
+			fa_fire_detector_now_status
+			(
+				fire_detector_seq,
+				alarm_fire,
+				smoke_event,
+				temperature_event,
+				flame_event,
+				co_event,
+				not_fire_yn,
+				battery_value,
+				last_updt_dt,
+				battery2_value
+			)
+		VALUES
+			(
+				#{fireDetectorSeq},
+				#{alarmFire},
+				#{smokeEvent},
+				#{temperatureEvent},
+				#{flameEvent},
+				#{coEvent},
+				#{notFireYn},
+				#{batteryValue},
+				now(),
+				#{battery2Value}
+			)
+	</insert>
+
+	<update id="update" parameterType="com.firealarm.admin.common.vo.FireDetectorNowStatusDT">
+		<![CDATA[
+			WITH upsert AS (
+							UPDATE fa_fire_detector_now_status
+							   SET
+									alarm_fire = #{alarmFire},
+									smoke_event = #{smokeEvent},
+									temperature_event = #{temperatureEvent},
+									flame_event = #{flameEvent},
+									co_event = #{coEvent},
+									not_fire_yn = #{notFireYn},
+									battery_value = #{batteryValue},
+									last_updt_dt = now(),
+									battery2_value = #{battery2Value}
+						  	 	WHERE
+						  	 		fire_detector_seq = #{fireDetectorSeq}
+					  	 	RETURNING *
+							)
+			INSERT INTO fa_fire_detector_now_status (fire_detector_seq, alarm_fire, smoke_event
+													, temperature_event, flame_event, co_event
+													, not_fire_yn, battery_value, last_updt_dt
+													, battery2_value)
+						SELECT #{fireDetectorSeq}, #{alarmFire}, #{smokeEvent}
+								, #{temperatureEvent}, #{flameEvent}, #{coEvent}
+								, #{notFireYn}, #{batteryValue}, now()
+								, #{battery2Value}
+				WHERE NOT EXISTS (SELECT * FROM upsert)
+        ]]>
+	</update>
+</mapper>

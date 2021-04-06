@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 통합관제지도 DAO -->
+<mapper namespace="com.firealarm.admin.biz.integration.totcontrolmap.dao.TotControlMapDAO">
+
+	<!-- 통합 관제 지도에 표시할 시장목록을 조회 -->
+	<select id="getAllMapMarketInfoList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapMarketVO">
+		SELECT
+			M.market_seq
+			, CONCAT(M.market_name, '(', MA.mng_area_name, ')') as market_name
+			, M.latitude
+			, M.longitude
+			, M.scale
+		FROM
+			fa_market M
+			, fa_mng_area MA
+		WHERE
+		 	M.mng_area_seq = MA.mng_area_seq
+		ORDER BY
+			M.market_name ASC
+	</select>
+
+	<!-- 통합 관제 지도에 표시할 화재감지기목록을 조회 -->
+	<select id="getAllMapFireDetectorList" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.MapFireDetectorVO">
+		SELECT
+			S.store_seq
+			, S.store_name
+			, S.market_seq
+			, CONCAT(M.market_name, '(', MA.mng_area_name, ')') as market_name
+			, S.mng_area_seq
+			, D.fire_detector_seq
+			, D.ctn_no
+			, D.latitude
+			, D.longitude
+			, DNS.alarm_fire
+			, DNS.not_fire_yn
+			, DNS.battery_value
+			, DNS.battery2_value
+			, CASE
+				WHEN (DNS.last_updt_dt &lt; now() - interval '73hour') then true
+				ELSE false
+			  END AS no_signal
+		FROM
+			fa_fire_detector D
+			, fa_fire_detector_now_status DNS
+			, fa_store S
+			, fa_market M
+			, fa_mng_area MA
+		WHERE
+			D.fire_detector_seq = DNS.fire_detector_seq
+	 		AND D.store_seq = S.store_seq
+	 		AND S.market_seq = M.market_seq
+	 		AND M.mng_area_seq = MA.mng_area_seq
+		ORDER BY
+			D.fire_detector_seq ASC
+	</select>
+
+	<!-- 지도에서 주기적으로 호출하는, 전체 감지기 이벤트 상태의 목록을 전달  -->
+	<select id="getAllStatusListInEvent" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.home.vo.FireDetectorNowStatusVO">
+		SELECT
+			D.fire_detector_seq
+			, DNS.alarm_fire
+			, DNS.not_fire_yn
+			, DNS.battery_value
+			, DNS.battery2_value
+			, CASE
+				WHEN (DNS.last_updt_dt &lt; now() - interval '73hour') then true
+				ELSE false
+			  END AS no_signal
+		FROM
+			fa_fire_detector D
+			, fa_fire_detector_now_status DNS
+			, fa_store S
+		where
+			D.fire_detector_seq = DNS.fire_detector_seq
+	 		AND D.store_seq = S.store_seq
+		 	AND
+		 	(
+		 		DNS.alarm_fire = true
+		 		OR DNS.battery_value &lt; 20
+				OR DNS.battery2_value &lt; 20
+				OR DNS.last_updt_dt &lt; (now() - interval '73hour')
+		 	)
+		ORDER BY
+			D.fire_detector_seq ASC;
+	</select>
+
+</mapper>

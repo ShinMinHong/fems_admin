@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.biz.store.storesmsusermng.dao.StoreSmsUserMngDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			area.mng_area_name,
+			market.market_seq,
+			market.market_name,
+			store.store_seq,
+			store.store_name,
+			smsuser.*
+		FROM
+			fa_store_sms_user smsuser
+			INNER JOIN fa_store store ON smsuser.store_seq = store.store_seq
+			INNER JOIN fa_mng_area area ON store.mng_area_seq = area.mng_area_seq
+			INNER JOIN fa_market market ON store.market_seq = market.market_seq
+		<where>
+			store.mng_area_seq = #{me.mngAreaSeq}
+			<if test="!@Ognl@isEmpty(search.marketSeq)">
+			   AND store.market_seq = #{search.marketSeq} :: Integer
+			</if>
+			<if test="!@Ognl@isEmpty(search.storeName)">
+			   AND store.store_name LIKE CONCAT('%',#{search.storeName},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.managerName)">
+			   AND smsuser.manager_name LIKE CONCAT('%',#{search.managerName},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.phoneNo)">
+			   AND smsuser.phone_no LIKE CONCAT('%',#{search.phoneNo},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.phoneNo)">
+			   AND smsuser.phone_no LIKE CONCAT('%',#{search.phoneNo},'%')
+			</if>
+			<if test="!@Ognl@isEmpty(search.smsReceiveYn)">
+				AND smsuser.sms_receive_yn = #{search.smsReceiveYn}::bool
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.store.storesmsusermng.vo.StoreSmsUserMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<!-- 점포 목록  -->
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.store.storesmsusermng.vo.StoreSmsUserMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<!-- 상세  -->
+	<select id="getBySmsUserSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.store.storesmsusermng.vo.StoreSmsUserMngVO">
+		SELECT
+			area.mng_area_name,
+			market.market_seq,
+			market.market_name,
+			store.store_name,
+			smsuser.*
+		FROM
+			fa_store_sms_user smsuser
+			INNER JOIN fa_store store ON smsuser.store_seq = store.store_seq
+			INNER JOIN fa_mng_area area ON store.mng_area_seq = area.mng_area_seq
+			INNER JOIN fa_market market ON store.market_seq = market.market_seq
+		<where>
+		 	smsuser.sms_user_seq = #{smsUserSeq}
+		</where>
+	</select>
+
+	<!-- 등록 -->
+	<insert id="insert" parameterType="java.util.Map">
+		INSERT INTO fa_store_sms_user
+				(
+					store_seq,
+					manager_name,
+					phone_no,
+					duty_name,
+					sms_receive_yn,
+					reg_admin_id
+				)
+			VALUES
+				(
+					#{vo.storeSeq},
+					#{vo.managerName},
+					#{vo.phoneNo},
+					#{vo.dutyName},
+					#{vo.smsReceiveYn},
+					#{me.adminId}
+				)
+	</insert>
+
+	<!-- 삭제  -->
+	<delete id="delete" parameterType="java.util.Map">
+		DELETE FROM
+			fa_store_sms_user
+		<where>
+		 	sms_user_seq = #{smsUserSeq}
+		 </where>
+	</delete>
+
+	<!-- 수정 -->
+	<update id="update" parameterType="java.util.Map">
+		UPDATE fa_store_sms_user
+		   SET
+			manager_name = #{vo.managerName},
+			phone_no = #{vo.phoneNo},
+			duty_name = #{vo.dutyName},
+			sms_receive_yn = #{vo.smsReceiveYn},
+			upd_date = now(),
+			upd_admin_id = #{me.adminId}
+	  	 <where>
+	  	 	sms_user_seq = #{vo.smsUserSeq}
+	  	 </where>
+	</update>
+
+	<!-- 같은 점포내에 중복 핸드폰 번호가 있는지 등록되었는지 체크  -->
+	<select id="hasDuplicatedData" parameterType="java.util.Map" resultType="java.lang.Boolean">
+		SELECT
+			EXISTS (
+						SELECT
+							*
+						FROM
+							fa_store_sms_user
+						WHERE
+							store_seq = #{storeSeq}
+							AND phone_no = #{phoneNo}
+					)
+	</select>
+
+	<!--  점포고유번호와  핸드폰 번호로  Sms 수신사용대상자 고유번호 조회  -->
+	<select id="getSmsUserSeqByStoreSeqAndPhoneNo" parameterType="java.util.Map" resultType="long">
+		SELECT
+			sms_user_seq
+		FROM
+			fa_store_sms_user
+		WHERE
+			store_seq = #{storeSeq}
+			AND phone_no = #{phoneNo}
+
+	</select>
+
+	<!-- 점포 SMS 대상자 모두 삭제  -->
+	<delete id="deleteSmsUserByStoreSeq" parameterType="java.util.Map">
+		DELETE FROM
+			fa_store_sms_user
+		<where>
+		 	store_seq = #{storeSeq}
+		 </where>
+	</delete>
+
+</mapper>

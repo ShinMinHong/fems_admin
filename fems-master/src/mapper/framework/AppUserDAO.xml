@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.security.dao.AppUserDAO">
+
+	<!-- userID로 회원 조회 -->
+	<select id="findAdminById" parameterType="java.util.Map" resultType="com.firealarm.admin.security.vo.AdminDT">
+		SELECT
+			*,
+			CASE
+				WHEN last_pw_change_dt IS NULL THEN true
+				ELSE last_pw_change_dt::DATE &lt;= (NOW()::DATE - INTERVAL '6 MONTH')
+			END AS pswd_expired
+		  FROM fa_admin
+		 WHERE
+			admin_id = #{adminId}
+			and use_yn = true
+	</select>
+
+   	<!-- 관리자ID로 관리자권한코드목록 조회 -->
+	<select id="findAdminRoleCodesById" parameterType="java.util.Map" resultType="java.lang.String">
+		select distinct R.ROLE_CODE
+		  from fa_admin A,
+		       fa_rolegroup RG,
+		       fa_rolegroup_role RGR,
+		       fa_role R
+		 where A.rolegroup_code = RG.rolegroup_code
+		   and RG.rolegroup_code = RGR.rolegroup_code
+		   and RGR.role_code = R.role_code
+		   and A.use_yn = true
+		   and A.admin_id = #{adminId}
+   </select>
+
+</mapper>

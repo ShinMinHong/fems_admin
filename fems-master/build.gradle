@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'war'
+//apply plugin: 'jetty'
+//apply plugin: 'eclipse-wtp'
+apply plugin: 'build-dashboard'
+
+// https://docs.gradle.org/current/userguide/war_plugin.html#sec:war_convention_properties
+webAppDirName = 'WebContent'
+
+// https://docs.gradle.org/current/userguide/java_plugin.html#sec:changing_java_project_layout
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            exclude '_test/**'
+        }
+        resources {
+            srcDir 'src'
+        }
+    }
+}
+
+repositories {
+	mavenCentral()
+    jcenter()
+}
+
+dependencies {
+	providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+	providedCompile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.0'
+	testCompile 'junit:junit:4.12'
+    compile fileTree(dir: "${webAppDirName}/WEB-INF/lib", include: '*.jar')
+}
+
+buildDir = 'target'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+war {
+	excludes = ["**/WEB-INF/classes/**/*", "**/WEB-INF/lib/**/*"]
+    archiveName = "${baseName}.${extension}" // projectName.war
+}

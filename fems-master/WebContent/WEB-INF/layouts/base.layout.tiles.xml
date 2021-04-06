@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<!-- 공통 속성 설정 -->
+	<definition name="base.properties">
+		<put-attribute name="title" value="지능형 화재감지 시스템" />
+	</definition>
+
+	<!-- 공통 레이아웃 설정 -->
+	<definition name="base.layout" extends="base.properties" template="/WEB-INF/layouts/base.layout.jsp">
+		<put-attribute name="globalheader" value="/WEB-INF/layouts/common/header.jsp" />
+		<put-attribute name="pagetitle" value="/WEB-INF/layouts/common/pagetitle.jsp" />
+		<put-attribute name="topmenu" value="/WEB-INF/layouts/common/topmenu.jsp" />
+		<put-attribute name="leftmenu" value="/WEB-INF/layouts/common/leftmenu.jsp" />
+		<put-attribute name="body" value="/WEB-INF/layouts/common/contents.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/layouts/common/footer.jsp" />
+	</definition>
+
+	<!-- 공통 레이아웃 설정 -->
+	<definition name="commonpopup/**" extends="base.properties" template="/WEB-INF/layouts/base.popup.layout.jsp">
+		<put-attribute name="globalheader" value="/WEB-INF/layouts/common/header.jsp" />
+		<put-attribute name="body" value="/WEB-INF/views/commonpopup/{1}.jsp"/>
+	</definition>
+
+	<!-- 공통 레이아웃 설정 -->
+	<definition name="exceldownload/**" extends="base.properties" template="/WEB-INF/layouts/base.exceldownload.layout.jsp">
+		<put-attribute name="body" value="/WEB-INF/views/{1}.jsp"/>
+	</definition>
+
+</tiles-definitions>

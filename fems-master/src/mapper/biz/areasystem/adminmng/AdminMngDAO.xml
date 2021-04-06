@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 사용자관리 DAO -->
+<mapper namespace="com.firealarm.admin.biz.areasystem.adminmng.dao.AdminMngDAO">
+
+	<sql id="getList_sql">
+	  	SELECT
+			*
+		FROM
+			fa_admin
+		<where>
+			<if test='!@Ognl@isEmpty(mngAreaSeq)'>
+				mng_area_seq  = #{mngAreaSeq}
+				AND rolegroup_code != 'HQ_ADMIN'
+			</if>
+			<if test="!@Ognl@isEmpty(search)">
+				<if test="!@Ognl@isEmpty(search.rolegroupCode)">
+					AND rolegroup_code = #{search.rolegroupCode}
+				</if>
+				<if test="!@Ognl@isEmpty(search.smsReceiveYn)">
+					AND sms_receive_yn = #{search.smsReceiveYn}::bool
+				</if>
+				<if test="!@Ognl@isEmpty(search.useYn)">
+					AND use_yn = #{search.useYn}::bool
+				</if>
+				<if test="!@Ognl@isEmpty(search.adminId)">
+					AND admin_id LIKE CONCAT('%', #{search.adminId},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.adminName)">
+					AND admin_name LIKE CONCAT('%', #{search.adminName},'%')
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.adminmng.vo.AdminMngVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.adminmng.vo.AdminMngVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<!-- 상세  -->
+	<select id="getUserDetailsByAdminSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.adminmng.vo.AdminMngVO">
+		SELECT
+			*
+		FROM
+			fa_admin
+	 	<where>
+		 	admin_seq = #{adminSeq}
+		 </where>
+	</select>
+
+	<!-- 아이디 중복 체크  -->
+	<select id="getSameIdCnt" parameterType="java.util.Map" resultType="int">
+		SELECT
+			count(*)
+		 FROM
+			fa_admin
+		 <where>
+		 	admin_id = #{adminId}
+		 </where>
+	</select>
+
+	<!-- 등록 -->
+	<insert id="insert" parameterType="java.util.Map">
+		INSERT
+			INTO fa_admin
+				(
+					rolegroup_code,
+					<if test="!@Ognl@isEmpty(vo.mngAreaSeq)">
+					mng_area_seq,
+					</if>
+					<if test="!@Ognl@isEmpty(vo.marketSeq)">
+					market_seq,
+					</if>
+					admin_id,
+					admin_password,
+					admin_name,
+					duty_name,
+					phone_no,
+					sms_receive_yn,
+					use_yn,
+					reg_date,
+					reg_admin_id,
+					upd_date,
+					upd_admin_id
+				)
+			VALUES
+				(
+					#{vo.rolegroupCode},
+					<if test="!@Ognl@isEmpty(vo.mngAreaSeq)">
+					#{vo.mngAreaSeq},
+					</if>
+					<if test="!@Ognl@isEmpty(vo.marketSeq)">
+					#{vo.marketSeq},
+					</if>
+					#{vo.adminId},
+					#{vo.adminPassword},
+					#{vo.adminName},
+					#{vo.dutyName},
+					#{vo.phoneNo},
+					#{vo.smsReceiveYn},
+					#{vo.useYn},
+					now(),
+					#{vo.regAdminId},
+					now(),
+					#{vo.regAdminId}
+				)
+	</insert>
+
+	<!-- 수정 -->
+	<update id="update" parameterType="java.util.Map">
+		UPDATE fa_admin
+		   SET
+			<if test='@Ognl@isTrue(vo.checkChangePassword)'>
+			admin_password = #{vo.adminPassword},
+			last_pw_change_dt = now(),
+			</if>
+			admin_name = #{vo.adminName},
+			duty_name = #{vo.dutyName},
+			phone_no = #{vo.phoneNo},
+			sms_receive_yn = #{vo.smsReceiveYn},
+			use_yn = #{vo.useYn},
+			upd_date = now(),
+			upd_admin_id = #{vo.updAdminId}
+	  	 <where>
+	  	 	admin_seq = #{vo.adminSeq}
+	  	 </where>
+	</update>
+
+	<!-- 비밀번호 초기화 -->
+	<update id="resetPassword" parameterType="java.util.Map">
+		UPDATE fa_admin
+		   SET
+			admin_password = #{pswd},
+			last_pw_change_dt = null,
+			password_fail_co = 0,
+			upd_date = now(),
+			upd_admin_id = #{me.adminId}
+	  	 WHERE
+	  	 	admin_seq = #{adminSeq}
+	</update>
+
+	<!-- 삭제  -->
+	<delete id="delete" parameterType="java.util.Map">
+		DELETE FROM
+			fa_admin
+		<where>
+		 	admin_seq = #{adminSeq}
+		</where>
+	</delete>
+</mapper>

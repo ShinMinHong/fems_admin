@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 문자메시지 발신관리  -->
+<mapper namespace="com.firealarm.admin.biz.areasystem.msgsendlog.dao.MsgSendLogDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			*
+	    FROM
+			fa_sms_send_log
+		<where>
+			mng_area_seq  = #{me.mngAreaSeq} :: INTEGER
+			AND send_date::date &gt;= #{search.startDate}::date
+	     	AND send_date::date &lt; #{search.endDate}::date + interval '1 day'
+			<if test="!@Ognl@isEmpty(search)">
+				<if test="!@Ognl@isEmpty(search.receiveUserNm)">
+					AND receive_user_nm LIKE CONCAT('%',#{search.receiveUserNm},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.receivePhoneNo)">
+					AND receive_phone_no LIKE CONCAT('%',#{search.receivePhoneNo},'%')
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.msgsendlog.vo.MsgSendLogVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.msgsendlog.vo.MsgSendLogVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+</mapper>
