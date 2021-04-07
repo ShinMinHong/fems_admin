@@ -52,6 +52,7 @@ public class IotService extends ServiceSupport {
 
 	public static final String SMS_LINE_BREAK = System.lineSeparator();
 	public static final String SMS_FIRE_TITLE = AppConfig.getInstance().getSmsSendTitle();
+	public static final String F119_SEND_TYPE = AppConfig.getInstance().getF119SendType();
 	public static final String SMS_LMS_REMAIN_WARN_TITLE = "지능형 화재감지기 LMS 부족 알림";
 
 	@Autowired IotDAO iotDAO;
@@ -319,19 +320,36 @@ public class IotService extends ServiceSupport {
 					&& AppProfiles.getInstance().isRuntimeProduction()
 					) {
 				Fire119SendVO sendData = new Fire119SendVO();
-				sendData.setSttemntCn("IOT신고 " + detectorInstallInfo.getRoadAddress()
-							+ ". 화재유형:" + firstFireEventLog.getFireEventString()
-							+ ". 점포명:" + detectorInstallInfo.getStoreName()
-							+ ". 단말기CTN:" + detectorInstallInfo.getCtnNo());
-				sendData.setCallName("퀘스타정보");
-				sendData.setCallTel(StringUtils.remove(appConfig.getSmsSendNo(), '-'));
-				sendData.setAplcntNm("퀘스타정보");
-				sendData.setAplcntTelno(StringUtils.remove(appConfig.getSmsSendNo(), '-'));
-				sendData.setCtrdCode(detectorInstallInfo.getCtrdCode());
-				sendData.setSignguCode(detectorInstallInfo.getSignguCode());
-				sendData.setDongCode(detectorInstallInfo.getDongCode());
-				sendData.setLiCode(detectorInstallInfo.getLiCode());
-				sendData.setLocation(detectorInstallInfo.getCtrdCode()+"000");
+				if (F119_SEND_TYPE.equals("T")) {
+					sendData.setSttemntCn("신고 테스트입니다." + detectorInstallInfo.getRoadAddress());
+					//sendData.setSttemntCn("IOT신고 " + detectorInstallInfo.getRoadAddress()
+					//			+ ". 화재유형:" + firstFireEventLog.getFireEventString()
+					//			+ ". 점포명:" + detectorInstallInfo.getStoreName()
+					//			+ ". 단말기CTN:" + detectorInstallInfo.getCtnNo());
+					sendData.setCallName("퀘스타정보");
+					sendData.setCallTel(StringUtils.remove(appConfig.getSmsSendNo(), '-'));
+					sendData.setAplcntNm("퀘스타정보");
+					sendData.setAplcntTelno(StringUtils.remove(appConfig.getSmsSendNo(), '-'));
+					sendData.setCtrdCode(detectorInstallInfo.getCtrdCode());
+					sendData.setSignguCode(detectorInstallInfo.getSignguCode());
+					sendData.setDongCode(detectorInstallInfo.getDongCode());
+					sendData.setLiCode(detectorInstallInfo.getLiCode());
+					sendData.setLocation(detectorInstallInfo.getCtrdCode()+"000");
+				} else {
+					sendData.setSttemntCn("IOT신고 " + detectorInstallInfo.getRoadAddress()
+					+ ". 화재유형:" + firstFireEventLog.getFireEventString()
+					+ ". 점포명:" + detectorInstallInfo.getStoreName()
+					+ ". 단말기CTN:" + detectorInstallInfo.getCtnNo());
+					sendData.setCallName("퀘스타정보");
+					sendData.setCallTel(StringUtils.remove(appConfig.getSmsSendNo(), '-'));
+					sendData.setAplcntNm("퀘스타정보");
+					sendData.setAplcntTelno(StringUtils.remove(appConfig.getSmsSendNo(), '-'));
+					sendData.setCtrdCode(detectorInstallInfo.getCtrdCode());
+					sendData.setSignguCode(detectorInstallInfo.getSignguCode());
+					sendData.setDongCode(detectorInstallInfo.getDongCode());
+					sendData.setLiCode(detectorInstallInfo.getLiCode());
+					sendData.setLocation(detectorInstallInfo.getCtrdCode()+"000");
+				}
 
 				try {
 					if(sendData.hasFire119AreaCode()) {

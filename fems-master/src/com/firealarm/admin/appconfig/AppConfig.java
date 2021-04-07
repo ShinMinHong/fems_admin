@@ -55,7 +55,6 @@ public class AppConfig implements InitializingBean {
     @Value("${max.logcnt.per.process}")
     private int maxLogcntPerProcess;
 
-
     /** Aligo SMS 발송 정보 */
 	@Value("${sms.apiKey}")
 	private String smsApiKey;
@@ -67,6 +66,10 @@ public class AppConfig implements InitializingBean {
 	private String smsSendTitle;
 	@Value("${sms.phoneno.lmscounterror}")
 	private String smsPhonenoLmscounterror;
+
+    /** 119다매체 전송 구분 정보 */
+	@Value("${f119.send.type}")
+	private String f119SendType;
 
 	@Override
 	public void afterPropertiesSet() {
@@ -96,6 +99,7 @@ public class AppConfig implements InitializingBean {
 		sb.append("\r\n- smsSendNo: " + smsSendNo);
 		sb.append("\r\n- smsSendTitle: " + smsSendTitle);
 		sb.append("\r\n- smsPhonenoLmscounterror: " + smsPhonenoLmscounterror);
+		sb.append("\r\n- f119SendType: " + f119SendType);
 		sb.append("\r\n===============================================");
 		logger.info(sb.toString());
 	}
