@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.firealarm.admin.biz.areasystem.firedetectorset.dao.FireDetectorSetDAO">
+
+	<sql id="getList_sql">
+		SELECT
+			*
+		FROM
+			(
+			SELECT
+				FD.fire_detector_seq,
+				CASE WHEN FD.store_seq IS NOT NULL THEN S.store_name else null END AS store_name,
+				FD.model_no,
+				FD.product_no,
+				FD.ctn_no ,
+				FD.serial_no,
+				FD.usim_no,
+				FD.zip_code,
+				FD.road_address,
+				FD.parcel_address,
+				FD.latitude,
+				FD.longitude,
+				FD.install_place,
+				FD.fire_detector_ack_value,
+				FD.fire_detector_name,
+				FD.sms_add_message,
+				FDNS.last_updt_dt,
+				CASE
+					WHEN FD.store_seq is null THEN '2'
+					WHEN (FDNS.last_updt_dt > now() - interval '73hour') = false then '3'
+					ELSE '1'
+				END as fireDetectorStatus,
+				A.mng_area_seq,
+				A.mng_area_name,
+				M.market_seq,
+				M.market_name
+			FROM
+				fa_fire_detector as FD
+			INNER JOIN fa_fire_detector_now_status as FDNS on
+				FDNS.fire_detector_seq = FD.fire_detector_seq
+			LEFT JOIN fa_store as S on
+				FD.store_seq = S.store_seq
+			LEFT JOIN fa_market as M on
+				S.market_seq = M.market_seq
+			LEFT JOIN fa_mng_area as A on
+				M.mng_area_seq = A.mng_area_seq ) AS SUB
+		<where>
+				<!-- 점포 선택 해제 된 곳까지  -->
+				((mng_area_seq= #{me.mngAreaSeq} :: Integer) or mng_area_seq is null )
+				<if test="!@Ognl@isEmpty(search.marketSeq)">
+					AND market_seq = #{search.marketSeq} :: Integer
+				</if>
+				<if test="!@Ognl@isEmpty(search.storeName)">
+					AND store_name LIKE CONCAT('%', #{search.storeName},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.ctnNo)">
+					AND ctn_no LIKE CONCAT('%', #{search.ctnNo},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.modelNo)">
+					AND model_no LIKE CONCAT('%', #{search.modelNo},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.productNo)">
+					AND product_no LIKE CONCAT('%', #{search.productNo},'%')
+				</if>
+				<if test="!@Ognl@isEmpty(search.fireDetectorStatus)">
+					AND fireDetectorStatus = #{search.fireDetectorStatus}
+				</if>
+		</where>
+	</sql>
+
+	<select id="getListAll" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.firedetectorset.vo.FireDetectorSetVO">
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY  ${sort}
+		</if>
+	</select>
+
+	<select id="getListPage" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.firedetectorset.vo.FireDetectorSetVO">
+		<include refid="base.pagingStartWithRn" />
+		<include refid="getList_sql" />
+		<if test="!@Ognl@isEmpty(sort)">
+			ORDER BY ${sort}
+		</if>
+		<include refid="base.pagingEnd" />
+	</select>
+
+	<select id="getListCount" parameterType="java.util.Map" resultType="int">
+		<include refid="base.countStart" />
+		<include refid="getList_sql" />
+		<include refid="base.countEnd" />
+	</select>
+
+	<!-- 상세  -->
+	<select id="getByFireDetectionSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.biz.areasystem.firedetectorset.vo.FireDetectorSetVO">
+		SELECT
+			FD.fire_detector_seq,
+			FD.store_seq,
+			FD.model_no,
+			FD.product_no,
+			FD.ctn_no ,
+			FD.serial_no,
+			FD.usim_no,
+			FD.zip_code,
+			FD.road_address,
+			FD.parcel_address,
+			FD.latitude,
+			FD.longitude,
+			FD.install_place,
+			FD.fire_detector_ack_value,
+			FD.fire_detector_name,
+			FD.sms_add_message,
+			FDNS.last_updt_dt,
+			FD.reg_admin_id,
+			FD.reg_date,
+			FD.upd_admin_id,
+			FD.upd_date,
+			CASE
+					WHEN FD.store_seq is null THEN '2'
+					WHEN (FDNS.last_updt_dt > now() - interval '73hour') = false then '3'
+					ELSE '1'
+			END as fireDetectorStatus,
+			A.mng_area_name,
+			A.mng_area_seq,
+			M.market_name,
+			M.market_seq,
+			S.store_name
+		FROM
+			fa_fire_detector as FD
+		INNER JOIN fa_fire_detector_now_status as FDNS ON
+			FDNS.fire_detector_seq = FD.fire_detector_seq
+		LEFT JOIN fa_store as S ON
+			FD.store_seq = S.store_seq
+		LEFT JOIN fa_market as M ON
+			S.market_seq = M.market_seq
+		LEFT JOIN fa_mng_area as A ON
+			M.mng_area_seq = A.mng_area_seq
+		WHERE FD.fire_detector_seq = #{vo.fireDetectorSeq}
+	</select>
+
+	<!-- 화재감지기의 파일 목록   -->
+	<select id="getFileListByFireDetectorSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.UploadFileVO">
+		SELECT
+			*
+		FROM
+			fa_fire_detector_file
+		<where>
+			fire_detector_seq = #{fireDetectorSeq}
+		</where>
+	</select>
+
+	<!-- 파일 상세 -->
+	<select id="getFileInfoByAttachedFileSeq" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.DownloadFileVO">
+		SELECT
+			*
+		FROM
+			fa_fire_detector_file
+		WHERE
+			attached_file_seq = #{attachedFileSeq}
+	</select>
+
+	<!-- 화재감지기의 파일 Sequence   -->
+	<select id="getAttachedFileSeqByFireDetectorSeq" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT
+			attached_file_seq
+		FROM
+			fa_fire_detector_file
+		WHERE
+			fire_detector_seq = #{fireDetectorSeq}
+	</select>
+
+
+	<!-- 등록  -->
+	<insert id="insert" parameterType="java.util.Map"  useGeneratedKeys="true" keyProperty="vo.fireDetectorSeq">
+		INSERT INTO fa_fire_detector
+			( store_seq,
+			model_no,
+			product_no,
+			ctn_no,
+			serial_no,
+			zip_code,
+			usim_no,
+			road_address,
+			parcel_address,
+			latitude,
+			longitude,
+			install_place,
+			fire_detector_ack_value,
+			reg_admin_id,
+			reg_date,
+			upd_admin_id,
+			upd_date,
+			fire_detector_name,
+			sms_add_message)
+		VALUES
+			( #{vo.storeSeq},
+			#{vo.modelNo},
+			#{vo.productNo},
+			#{vo.ctnNo},
+			#{vo.serialNo},
+			#{vo.zipCode},
+			#{vo.usimNo},
+			#{vo.roadAddress},
+			#{vo.parcelAddress},
+			#{vo.latitude},
+			#{vo.longitude},
+			#{vo.installPlace},
+			#{vo.fireDetectorAckValue},
+			#{vo.regAdminId},
+			now(),
+			#{vo.regAdminId},
+			now(),
+			#{vo.fireDetectorName},
+			#{vo.smsAddMessage})
+	</insert>
+
+	<!-- 등록 - 파일   -->
+	<insert id="insertFileInfoListToDB" parameterType="java.util.Map">
+			INSERT INTO fa_fire_detector_file
+				(
+					fire_detector_seq,
+					attached_file_name,
+					orginal_file_name,
+					attached_file_size,
+					attached_file_path,
+					reg_date,
+					reg_admin_id
+				)
+			VALUES
+		<foreach item="item" collection="fileList" separator="," >
+				(
+					#{fireDetectorSeq},
+					#{item.attachedFileName},
+					#{item.orginalFileName},
+					#{item.attachedFileSize},
+					#{item.attachedFilePath},
+					now(),
+					#{me.adminId}
+				)
+		</foreach>
+	</insert>
+
+	<!-- 수정 -->
+	<update id="update" parameterType="java.util.Map">
+		UPDATE fa_fire_detector
+		   SET
+			store_seq = #{vo.storeSeq},
+			model_no = #{vo.modelNo},
+			product_no = #{vo.productNo},
+			serial_no = #{vo.serialNo},
+			usim_no = #{vo.usimNo},
+			zip_code = #{vo.zipCode},
+			road_address = #{vo.roadAddress},
+			parcel_address = #{vo.parcelAddress},
+			latitude = #{vo.latitude},
+			longitude = #{vo.longitude},
+			install_place = #{vo.installPlace},
+			<if test="!@Ognl@isEmpty(vo.fireDetectorAckValue)">
+			fire_detector_ack_value = #{vo.fireDetectorAckValue},
+			</if>
+			upd_admin_id = #{vo.updAdminId},
+			upd_date = now(),
+			fire_detector_name = #{vo.fireDetectorName},
+			sms_add_message = #{vo.smsAddMessage}
+	  	 WHERE
+	  	 	<if test="!@Ognl@equalsIgnoreCase(vo.fireDetectorSeq,'0')">
+	  	 	fire_detector_seq  = #{vo.fireDetectorSeq}
+	  	 	</if>
+	  	 	<if test="@Ognl@equalsIgnoreCase(vo.fireDetectorSeq,'0')">
+	  	 	ctn_no = #{vo.ctnNo}
+	  	 	</if>
+	</update>
+
+	<!-- 삭제  -->
+	<delete id="delete" parameterType="java.util.Map">
+		DELETE FROM
+			fa_fire_detector
+		<where>
+		 	fire_detector_seq = #{fireDetectorSeq}
+		</where>
+	</delete>
+
+	<!-- 파일 삭제  -->
+	<delete id="deleteFileByAttachedFileSeq" parameterType="java.util.Map">
+		DELETE FROM
+			fa_fire_detector_file
+		<where>
+		 	attached_file_seq = #{attachedFileSeq}
+		</where>
+	</delete>
+
+	<!-- Sequence로 파일의 경로 조회  -->
+	<select id="getFilePathByAttachedFileSeq" parameterType="java.util.Map" resultType="java.lang.String">
+		SELECT
+			attached_file_path
+		FROM
+			fa_fire_detector_file
+		<where>
+			attached_file_seq = #{attachedFileSeq};
+		</where>
+	</select>
+
+	<!-- 해당 점포에 화제감지기 등록 여부 체크 -->
+	<select id="getFireDetectorCnt" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+			count(fire_detector_seq)
+		FROM
+			fa_fire_detector
+		<where>
+			store_seq = #{storeSeq}
+		</where>
+	</select>
+
+	<!-- CTN 중복 여부  -->
+	<select id="hasDuplicatedCtnNo" parameterType="java.util.Map" resultType="java.lang.Boolean">
+		SELECT
+			EXISTS (
+					SELECT
+						*
+					FROM
+						fa_fire_detector
+					WHERE ctn_no = #{ctnNo}
+					)
+	</select>
+
+	<!-- File 중복 여부   -->
+	<select id="hasAttachedFileSeq" parameterType="java.util.Map" resultType="java.lang.Boolean">
+		SELECT EXISTS (
+						SELECT
+							*
+						FROM
+							fa_fire_detector_file
+						WHERE attached_file_seq = #{attachedFileSeq}
+						)
+	</select>
+
+	<!-- 점포선택해제   -->
+	<update id="disconnectionWithStore" parameterType="java.util.Map">
+		UPDATE
+			fa_fire_detector
+		SET
+			store_seq = null,
+			zip_code = null,
+			road_address = null,
+			parcel_address = null,
+			latitude = null,
+			longitude = null,
+			install_place = null
+		WHERE
+			ctn_no = #{ctnNo}
+	</update>
+
+	<!-- 사용중지[슬립요청] 으로 ACK 신호 변경 -->
+	<update id="preventsubmission" parameterType="java.util.Map">
+		UPDATE
+			fa_fire_detector
+		SET
+			fire_detector_ack_value = '1'
+		WHERE
+			ctn_no = #{ctnNo}
+	</update>
+
+	<!-- 화재감지기 현재상태  -->
+	<select id="getFireDetectorNowStatusDT" parameterType="java.util.Map" resultType="com.firealarm.admin.common.vo.FireDetectorNowStatusDT">
+		SELECT
+			*
+		FROM
+			fa_fire_detector_now_status
+		WHERE
+			fire_detector_seq = #{fireDetectorSeq}
+	</select>
+
+</mapper>

@@ -96,6 +96,7 @@
 								</sec:authorize>
 								<sec:authorize access="hasAnyRole('ROLE_ADMIN_MNG', 'ROLE_ADMIN_READ')">
 									<li><a href="${contextPath}/areasystem/adminmng" data-nav="areasystem/adminmng"><i class="icon-key"></i><span>관리자 관리</span><span class="label"><i class="icon-new-tab2" onclick="clickMenuOnNewTab(this, event)"></i></span></a></li>
+									<li><a href="${contextPath}/areasystem/firedetectorset" data-nav="areasystem/firedetectorset"><i class="icon-key"></i><span>화재감지기 설정 관리</span><span class="label"><i class="icon-new-tab2" onclick="clickMenuOnNewTab(this, event)"></i></span></a></li>
 									<li><a href="${contextPath}/areasystem/loginhistory" data-nav="areasystem/loginhistory"><i class="icon-key"></i><span>접속정보 이력 관리</span><span class="label"><i class="icon-new-tab2" onclick="clickMenuOnNewTab(this, event)"></i></span></a></li>
 									<li><a href="${contextPath}/areasystem/msgsendlog" data-nav="areasystem/msgsendlog"><i class="icon-key"></i><span>문자메시지 발신 관리</span><span class="label"><i class="icon-new-tab2" onclick="clickMenuOnNewTab(this, event)"></i></span></a></li>
 									<li><a href="${contextPath}/areasystem/fire119sendlog" data-nav="areasystem/fire119sendlog"><i class="icon-key"></i><span>119 다매체 발신 관리</span><span class="label"><i class="icon-new-tab2" onclick="clickMenuOnNewTab(this, event)"></i></span></a></li>

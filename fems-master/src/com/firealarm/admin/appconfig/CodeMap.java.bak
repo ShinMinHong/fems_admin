@@ -238,38 +238,4 @@ public class CodeMap {
 		public String getCodeName() {return getCodeName(this.toString());}
 	}
 
-	/** 화재감지기 설정 요청 구분 */
-	/** 감지기 상태 코드 */
-	public enum FIRE_DETECTOR_SET_TYPE {
-		;
-		private static Map<String, String> codeMap = new HashMap<String, String>();
-		public static final Map<String, String> getCodeMap() {return codeMap;}
-		public static String getCodeName(String key) {return (codeMap.containsKey(key))? codeMap.get(key) : key; }
-		public static String getCodeName(FIRE_DETECTOR_SET_TYPE value) { return (value == null) ? "": value.getCodeName(); }
-		static {
-			codeMap.put("0", "RESET 요청");
-			codeMap.put("1", "TIMER 요청");
-			codeMap.put("2", "센서값 변경 요청");
-			codeMap.put("3", "IP주소 변경 요청");
-			codeMap.put("4", "상태값 전송 시간 요청");
-		}
-		public String getCodeName() {return getCodeName(this.toString());}
-	}
-
-	/** 화재감지기 설정 전송 여부 코드 */
-	public enum FIRE_DETECTOR_SET_SEND_YN {
-		TRUE,
-		FALSE;
-		private static Map<String, String> codeMap = new HashMap<String, String>();
-		public static final Map<String, String> getCodeMap() {return codeMap;}
-		public static String getCodeName(String key) {return (codeMap.containsKey(key))? codeMap.get(key) : key; }
-		public static String getCodeName(FIRE_DETECTOR_SET_SEND_YN value) { return (value == null) ? "": value.getCodeName(); }
-		static {
-			codeMap.put("true", "전송");
-			codeMap.put("false", "미전송");
-		}
-
-		public String getCodeName() {return getCodeName(this.toString());}
-	}
-
 }
