@@ -35,13 +35,15 @@ import framework.vo.SearchMap;
 
 
 /**
- * 화재감지기 설정 관리 Service
- * @author SMH
+ * 화재감지기 관리 Service
+ * @author JKS
  */
 @Service
 public class FireDetectorSetService extends ServiceSupport {
 
+	@Autowired FileStorageManager fileStorageManager;
 	@Autowired FireDetectorSetDAO FireDetectorSetDAO;
+	@Autowired StoreMngService storeMngService;
 	@Autowired CommonCodeMapService commonCodeMapService;
 	@Autowired SmartValidator smartValidator;
 

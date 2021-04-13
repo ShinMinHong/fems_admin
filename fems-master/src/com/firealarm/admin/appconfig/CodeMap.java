@@ -256,20 +256,4 @@ public class CodeMap {
 		public String getCodeName() {return getCodeName(this.toString());}
 	}
 
-	/** 화재감지기 설정 전송 여부 코드 */
-	public enum FIRE_DETECTOR_SET_SEND_YN {
-		TRUE,
-		FALSE;
-		private static Map<String, String> codeMap = new HashMap<String, String>();
-		public static final Map<String, String> getCodeMap() {return codeMap;}
-		public static String getCodeName(String key) {return (codeMap.containsKey(key))? codeMap.get(key) : key; }
-		public static String getCodeName(FIRE_DETECTOR_SET_SEND_YN value) { return (value == null) ? "": value.getCodeName(); }
-		static {
-			codeMap.put("true", "전송");
-			codeMap.put("false", "미전송");
-		}
-
-		public String getCodeName() {return getCodeName(this.toString());}
-	}
-
 }

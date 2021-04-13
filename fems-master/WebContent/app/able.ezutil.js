@@ -213,7 +213,7 @@
 			//ajaxComplete(event, XMLHttpRequest, ajaxOptions)
 			//ajaxStop()
 			$(document).ajaxStart(function() { self.block(); });
-			$(document).ajaxError(function() { 
+			$(document).ajaxError(function() {
 				self.unblock();
 			});
 			$(document).ajaxSuccess(function() { self.unblock(); });
@@ -307,10 +307,6 @@
 		 */
 		/** Indicator용 메지지 포맷팅 */
 		self.formatIndicatorMessage = function(message) {
-			//message = message || _MESSAGES.loadingIndicatorMessage; //default Message 처리
-			//var src = "/images/blockui/busy4.gif";
-			//return _.sprintf("<div style='color:#555555;font-size:12px;font-weight:bold;'><br/><img src='%s' style='vertical-align: middle;'/> %s<br/><br/></div>", src, message);
-
 			//고객사에서 박스없이 이미지만 표시 요청
 			var src = (contextPath||"") + "/lib/blockui/busy5.gif";
 			return _.sprintf("<div><img src='%s' style='width:48px; height:48px'/><div>", src);
@@ -453,21 +449,6 @@
 			if(_.isString(response)) {
 				response = JSON.parse(response);
 			}
-
-			//{
-			//	  "status" : "ERROR",
-			//	  "msg" : null,
-			//	  "cbCmd" : null,
-			//	  "cbParam" : null,
-			//	  "body" : null,
-			//	  "error" : [ {
-			//	    "objectName" : "mstCodeDT",
-			//	    "field" : "isDelete",
-			//	    "rejectedValue" : null,
-			//	    "code" : "NotNull",
-			//	    "message" : "__FIELD_NAME__ 항목은 필수입니다."
-			//	  }, ...]
-			//}
 
 			if(_.isUndefined(response.status)) {
 				return false;
@@ -950,13 +931,13 @@
 		    }
 		    return tel;
 		};
-		
+
 		// SelectOption value의  해당 Text 값 반환
 		// ex) var MARKET= [{text:"백련시장", value: "3"},{text: "인왕시장", value: "2"},{text: "포방터시장", value: "1"}] ,  self.findTextByValue(MARKET,'3') , 결과값:백련시장
 		self.findByValue = function(selectOption, value){
 		  var result = {text:""};
 		  _.map(selectOption, function(row){if(row.value == value){result.text = row.text}})
-			return result['text']; 
+			return result['text'];
 		}
 
 		// Object 의 value 타입이 boolean 혹은 number일떄 string type으로 타입 변환

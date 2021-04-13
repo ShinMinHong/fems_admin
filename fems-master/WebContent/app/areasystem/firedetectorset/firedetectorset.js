@@ -20,21 +20,17 @@ function FireDetectorSetVM() {
 	self.mngAreaSelectOptions = pageParam.AREA_CODE_MAP;
 	// 시장목록 코드맵
 	self.marketSelectOptions = pageParam.MARKET_CODE_MAP;
-	// 감지기 상태 코드맵
-	self.fireDetectorStatus = ezUtil.convertObjectToSelectOptions(pageParam.FIRE_DETECTOR_STATUS);
-	// 감지기 ACK 코드맵
-	self.fireDetectorAckValue = ezUtil.convertObjectToSelectOptions(pageParam.FIRE_DETECTOR_ACK_VALUE);
-	// 감지기 정렬순서
-	self.fireDetectorSortType = ezUtil.convertObjectToSelectOptions(pageParam.FIRE_DETECTOR_SORT_TYPE);
+	// 감지기 설정 상태 코드맵
+	self.fireDetectorSetType = ezUtil.convertObjectToSelectOptions(pageParam.FIRE_DETECTOR_SET_TYPE);
 
 	//Search VM
 	self.searchData = ko.observable({
 		searchMarketSeq:pageParam.ME_MARKET_SEQ,
 		searchStoreName:"",
 		searchCtnNo:"",
-		searchModelNo:"",
-		searchProductNo:"",
-		searchFireDetectorStatus:"", // 감지기 상태
+		searchStartDate:"",
+		searchEndDate:"",
+		searchFireDetectorSetType:"", // 감지기 설정상태
 		searchSort:""
 	});
 
@@ -58,29 +54,22 @@ function FireDetectorSetVM() {
 	//Create
 	self.onCreateClick = function() {
 		self.detailsVM.startCreate({
-			fireDetectorSeq:"", // 고유번호
-			mngAreaName:"", // 관제지역명
-			marketName: "", // 관리지역명
-			storeName:ko.observable(""), // 점포명 (화면에 따라 변환)
-			modelNo:"", // 모델번호
-			productNo:"", // 제조번호
-			ctnNo:"", // CTN NO
-			serialNo:"", // 일련번호
-			usimNo:"", // 유심번호
-			zipCode:ko.observable(""), // ZipCode
-			roadAddress:ko.observable(""), //주소(도로명)
-			parcelAddress:ko.observable(""),//주소(지번)
-			latitude:ko.observable(""), //위도(중심좌표)
-			longitude:ko.observable(""),//경도(중심좌표)
-			installPlace:"", // 설치위치
-			fireDetectorAckValue:"", // 감지기 ACK
-			fireDetectorName:"", // 화재수신기명
-			smsAddMessage:"", // SMS 추가메시지
-			regAdminId :"", // 등록자
-			regDate:"", // 등록일
-			updAdminId :"", // 수정자
-			updDate:"", // 수정일
-			boardFiles : null // 다운로드 boardFiles
+			fireDetectorSetSeq:"",			// 감지기설정고유번호
+			fireDetectorSeq:"",				// 감지기고유번호
+			mngAreaName:"", 				// 관제지역명
+			marketName: "", 				// 관리지역명
+			storeName:ko.observable(""), 	// 점포명 (화면에 따라 변환)
+			ctnNo:"", 						// CTN NO
+			fireDetectorSetType:"", 		// 감지기설정 구분
+			fireDetectorSetValue:"", 		// 감지기설정 구분값
+			fireDetectorSetStrDate:"", 		// 감지기설정 시작일시
+			fireDetectorSetEndDate:"", 		// 감지기설정 종료일시
+			fireDetectorSetsendYn:"", 		// 감지기설정 전송유무
+			fireDetectorSetsendDate:"", 	// 감지기설정 전송일시
+			regAdminId :"", 				// 등록자
+			regDate:"", 					// 등록일
+			updAdminId :"", 				// 수정자
+			updDate:""	 					// 수정일
 		});
 	};
 
@@ -92,7 +81,7 @@ function FireDetectorSetVM() {
 		switch(type) {
 			case "rowSelected" :
 				$.ajax({
-					url: $.format("{0}/{1}.json", self.detailsURL, data.fireDetectorSeq),
+					url: $.format("{0}/{1}.json", self.detailsURL, data.fireDetectorSetSeq),
 					type: "GET",
 					contentType: "application/json",
 					success: function(data) {
@@ -114,40 +103,18 @@ function FireDetectorSetVM() {
 		{ field: "mngAreaName", title: "관제지역명", width: 150, ezAlign: 'center'},
 		{ field: "marketName", title: "관리지역명", width: 170, ezAlign: 'center'},
 		{ field: "storeName", title: "점포명", width: 200, ezAlign: 'center'},
-		{ field: "modelNo", title: "모델번호", width: 120, ezAlign: 'center'},
 		{ field: "ctnNo", title: "CTN 번호", width: 120, ezAlign: 'center'},
-		{ field: "fireDetectorStatus", title: "상태", width: 120, ezAlign: 'center', template: self.gridColumnTemplate.getTextFromCodeMap('fireDetectorStatus',self.fireDetectorStatus)},
+		{ field: "fireDetectorSetType", title: "감지기 설정 구분", width: 120, ezAlign: 'center', template: self.gridColumnTemplate.getTextFromCodeMap('fireDetectorSetType',self.fireDetectorSetType)},
+		{ field: "fireDetectorSetStrDate", title: "감지기 설정 시작일시", width: 150, ezAlign: 'center',template: self.gridColumnTemplate.momentFormatter('fireDetectorSetStrDate',self.fireDetectorSetStrDate)},
+		{ field: "fireDetectorSetEndDate", title: "감지기 설정 종료일시", width: 150, ezAlign: 'center',template: self.gridColumnTemplate.momentFormatter('fireDetectorSetEndDate',self.fireDetectorSetEndDate)},
+		{ field: "fireDetectorSetSendYn", title: "감지기 설정 전송 여부", width: 120, ezAlign: 'center', template: self.gridColumnTemplate.getTextFromCodeMap('fireDetectorSetSendYn',self.fireDetectorSetSendYn)},
+		{ field: "fireDetectorSetSendDate", title: "감지기 설정 전송일시", width: 150, ezAlign: 'center',template: self.gridColumnTemplate.momentFormatter('fireDetectorSetSendDate',self.fireDetectorSetSendDate)},
 		{ field: "lastUpdtDt", title: "최종수집일", width: 150, ezAlign: 'center',template: self.gridColumnTemplate.momentFormatter('lastUpdtDt') }
 	];
 
 	self.grid = new AbleKendoGridVM("#grid", self.listURL, self.gridColumns, self.onGridEvent, self.applySearchCondition);
 
 	self.detailsVM = new DataDetailsVM( self.detailsURL, self.grid.load);
-
-	//Excel Download
-	self.isMergeExcelCell = ko.observable(false);
-	self.excelDownload = function(){
-		if(rootVM.grid.dataSource._pristineData.length==0){
-			alert("검색된 데이터가 없습니다.");
-			return;
-		}
-		var url = self.baseURL +"/excel?";
-		var data  = _.extend(self.searchCondition, {mergeExcelCell: self.isMergeExcelCell()});
-		var params = $.param(data);
-		document.location.href = url + params;
-	};
-
-	//Excel Upload
-	self.openExcelUpload = function(){
-		if (_.isBlank(self.excelUploadPopupSrc)){
-			self.excelUploadPopupSrc = contextPath + "/commonpopup/openfiredetectorexcelupload";
-			self.excelUploadPopupVM = new ExcelUploadPopupVM("#excelUploadModal", self.excelUploadPopupSrc);
-		}
-		self.excelUploadPopupVM.open();
-		if ( $('iframe[id=excelUploadModal]')[0].contentWindow.rootVM != null && $('iframe[id=excelUploadModal]')[0].contentWindow.rootVM.init != null ){
-			$('iframe[id=excelUploadModal]')[0].contentWindow.rootVM.init();
-		}
-	};
 
 	self.init = function() {
 		self.search();
@@ -166,11 +133,6 @@ function DataDetailsVM(detailsURL, onDetailsChanged) {
 
 	//상세정보 REST API 기본URL - CRUD
 	self.detailsURL = detailsURL;
-	// 파일 삭제 URL
-	self.deleteFileURL = detailsURL + "/deletefile";
-	//  파일 다운로드 URL
-	self.downloadURL = detailsURL + "/filedownload/" ;
-
 	//데이터 변경 핸들러
 	self.onDetailsChanged = onDetailsChanged || function() {};
 
@@ -212,7 +174,7 @@ function DataDetailsVM(detailsURL, onDetailsChanged) {
 			if(self.isEditMode){
 				self.isDisconnected((dataCloned.storeSeq==null))
 			}
-			dataCloned.fireDetectorStatus = ko.observable(dataCloned.fireDetectorStatus);
+			dataCloned.fireDetectorSetType = ko.observable(dataCloned.fireDetectorSetType);
 			// 관제지역명,관리지역명,점포명
 			dataCloned.mngAreaName = ko.observable(dataCloned.mngAreaName);
 			dataCloned.marketName = ko.observable(dataCloned.marketName);
@@ -225,14 +187,6 @@ function DataDetailsVM(detailsURL, onDetailsChanged) {
 			dataCloned.parcelAddress = ko.observable(dataCloned.parcelAddress);
 			dataCloned.roadAddress = ko.observable(dataCloned.roadAddress);
 		}
-		// 화재감지기 현재상태
-		_.defer(function(){
-			if ( self.isEditMode() ){ //편집모드일떄 수정내용 초기화 및 화재수신기 변경이력 데이터 설정
-				self.fireDetectorNowStatusListGrid = new AbleKendoTableVM("#fireDetectorNowStatusHist", self.fireDetectorNowStatusListGridColumns, {height: 60,pageable:false,scrollable: false, filterable:false},null);
-				self.fireDetectorNowStatusListGrid.setData(dataCloned? dataCloned.fireDetectorNowStatusDT: []);
-			}
-		})
-
 		self.originalData(data);
 		self.data(dataCloned);
 	}
@@ -241,43 +195,10 @@ function DataDetailsVM(detailsURL, onDetailsChanged) {
 		return self.data().ctnNo;
 	}
 
-	self.fireDetectorNowStatusListGridColumns = [
-		{ field: "ctnNo", title: "CTN 번호", width: 40, ezAlign: 'center', template: self.getCtn},
-		{ field: "alarmFire", title: "현재상태", width: 40, ezAlign: 'center' ,template: self.gridColumnTemplate.TFCodeMap('alarmFire',"<font color='red'><b>화재</b></font>","<font color='blue'><b>정상</b></font>")},
-		{ field: "smokeEvent", title: "화원(연기)", width: 40, ezAlign: 'center',template: self.gridColumnTemplate.TFCodeMap('smokeEvent',"<font color='red'><b>ON</b></font>","<font color='blue'><b>OFF</b></font>")},
-		{ field: "temperatureEvent", title: "화원(온도)", width: 40, ezAlign: 'center',template: self.gridColumnTemplate.TFCodeMap('temperatureEvent',"<font color='red'><b>ON</b></font>","<font color='blue'><b>OFF</b></font>")},
-		{ field: "flameEvent", title: "화원(불꽃)", width: 40, ezAlign: 'center',template: self.gridColumnTemplate.TFCodeMap('flameEvent',"<font color='red'><b>ON</b></font>","<font color='blue'><b>OFF</b></font>")},
-		{ field: "coEvent", title: "화원(CO)", width: 40, ezAlign: 'center',template: self.gridColumnTemplate.TFCodeMap('coEvent',"<font color='red'><b>ON</b></font>","<font color='blue'><b>OFF</b></font>")},
-		{ field: "batteryValue", title: "3V 배터리(%)", width: 40, ezAlign: 'center'},
-		{ field: "battery2Value", title: "3.6V 배터리(%)", width: 40, ezAlign: 'center'},
-		{ field: "notFireYn", title: "비화재보", width: 40, ezAlign: 'center',template: self.gridColumnTemplate.TFCodeMap('notFireYn',"<font color='blue'><b>비화재</b></font>","<font color='red'><b>화재</b></font>") },
-		{ field: "lastUpdtDt", title: "최종수집일시", width: 40, ezAlign: 'center',template: self.gridColumnTemplate.momentFormatter('lastUpdtDt') }
-	];
-
-	var pkColumn = "fireDetectorSeq";
+	var pkColumn = "fireDetectorSetSeq";
 	self.isEditMode = ko.computed(function() { return !_.isNull(self.originalData()) && !_.isBlank(self.originalData()[pkColumn]); });
 	self.isCreateMode = ko.computed(function() { return !_.isNull(self.originalData()) && _.isBlank(self.originalData()[pkColumn]); });
 	self.isVisible = ko.computed(function() { return self.isEditMode() || self.isCreateMode() });
-
-	//주소 검색 클릭
-	self.clickSearchAddress = function() {
-		new daum.Postcode(rootVM.commonPopupEvent.searchAddrEvent.openFn).open();
-	};
-
-	// 주소 검색창
-	self.showSelectLocationModal = function(){
-		var originalLocationModal=$('#selectLocationModal').clone();
-		if ( self.selectLocationPopupSrc == null ){
-			self.selectLocationPopupSrc = contextPath + "/commonpopup/openselectlocation";
-			self.selectLocationPopupVM = new SelectLocationPopupVM("#selectLocationModal", self.selectLocationPopupSrc);
-		} else {
-			$('#selectLocationModal').remove();
-			var myClone = originalLocationModal.clone();
-			$('body').append(myClone);
-			self.selectLocationPopupVM = new SelectLocationPopupVM(myClone, self.selectLocationPopupSrc);
-		}
-		self.selectLocationPopupVM.open();
-	};
 
 	// 점포 선택 창
 	self.showSelectStoreModal = function(){

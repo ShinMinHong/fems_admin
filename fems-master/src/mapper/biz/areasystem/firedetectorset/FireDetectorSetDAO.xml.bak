@@ -59,9 +59,7 @@
 				AND fire_detector_set_send_yn = #{search.useYn}::bool
 			</if>
 		   	AND fire_detector_set_str_date::date &lt;= #{search.startDate}::date
-			<if test="!@Ognl@isEmpty(search.endDate)">
-		   		AND fire_detector_set_end_date::date &gt;= #{search.endDate}::date
-			</if>
+		   	AND fire_detector_set_end_date::date &gt;= #{search.endDate}::date
 		</where>
 	</sql>
 

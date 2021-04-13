@@ -377,23 +377,6 @@ public class AbleUtil {
 		logger.trace("{} ==> X-Requested-With at Parameter: {}", request.getClass().getSimpleName(), request.getParameter(headerName));
 		logger.trace("{} ==> X-Requested-With at Attribute: {}", request.getClass().getSimpleName(), request.getAttribute(headerName));
 
-		/*if (logger.isTraceEnabled()) {
-			@SuppressWarnings("rawtypes")
-			Enumeration names = request.getHeaderNames();
-			while (names.hasMoreElements()) {
-				String name = (String) names.nextElement();
-				logger.trace(" header - {} : {}", name, request.getHeader(name));
-			}
-		}
-		if (logger.isTraceEnabled()) {
-			@SuppressWarnings("rawtypes")
-			Enumeration names = request.getParameterNames();
-			while (names.hasMoreElements()) {
-				String name = (String) names.nextElement();
-				logger.trace(" parameter - {} : {}", name, request.getParameter(name));
-			}
-		}*/
-
 		String xRequestWith = null;
         if(request.getHeader(headerName) != null) {
         	xRequestWith = request.getHeader(headerName).toLowerCase();

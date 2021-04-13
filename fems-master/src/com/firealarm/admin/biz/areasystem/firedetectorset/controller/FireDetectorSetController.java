@@ -21,7 +21,7 @@ import com.firealarm.admin.appconfig.AppConst;
 import com.firealarm.admin.appconfig.CodeMap.APP_USER_GRADE;
 import com.firealarm.admin.appconfig.CodeMap.FIRE_DETECTOR_ACK_VALUE;
 import com.firealarm.admin.appconfig.CodeMap.FIRE_DETECTOR_SORT_TYPE;
-import com.firealarm.admin.appconfig.CodeMap.FIRE_DETECTOR_STATUS;
+import com.firealarm.admin.appconfig.CodeMap.FIRE_DETECTOR_SET_TYPE;
 import com.firealarm.admin.biz.areasystem.firedetectorset.service.FireDetectorSetService;
 import com.firealarm.admin.biz.areasystem.firedetectorset.vo.FireDetectorSetVO;
 import com.firealarm.admin.common.service.CommonCodeMapService;
@@ -67,48 +67,9 @@ public class FireDetectorSetController extends MngAreaControllerSupport {
 			model.addAttribute("MARKET_CODE_MAP", AbleUtil.toJson(commonCodeMapService.getMarketNameCodeMapByMngAreaSeq(mngAreaSeq)));
 		}
 
-		model.addAttribute("FIRE_DETECTOR_STATUS" , AbleUtil.toJson(FIRE_DETECTOR_STATUS.getCodeMap()));
-		model.addAttribute("FIRE_DETECTOR_ACK_VALUE" , AbleUtil.toJson(FIRE_DETECTOR_ACK_VALUE.getCodeMap()));
-		model.addAttribute("FIRE_DETECTOR_SORT_TYPE" , AbleUtil.toJson(FIRE_DETECTOR_SORT_TYPE.getCodeMap()));
-		/** 파일 설정 */
-		model.addAttribute("FILE_MAX_COUNT" , AppConst.ALLOWED_BOARDFILE_COUNT);
-		model.addAttribute("FILE_UPLOAD_MAX_SIZE" , AppConst.ALLOWED_BOARDFILE_SIZE);
-		model.addAttribute("FILE_DISPLAY_UPLOAD_MAX_SIZE" , AppConst.ALLOWED_BOARDFILE_DISPLAY_SIZE);
-		model.addAttribute("ALLOWED_EXTENSION" , AppConst.ALLOWED_EXTENSION_FOR_IMAGE);
+		/** 감지기 설정 상태 */
+		model.addAttribute("FIRE_DETECTOR_SET_TYPE" , AbleUtil.toJson(FIRE_DETECTOR_SET_TYPE.getCodeMap()));
 
-		return "areasystem/firedetectorset/firedetectormng";
-	}
-
-	@RequestMapping(value = "/excel", method = RequestMethod.GET)
-	public View excelDownload(
-			HttpServletRequest request,
-			@AppLoginUser AppUserDetails user,
-			@SortDefault(sort = "authorgroupCode", direction=Direction.ASC) Sort sort,
-			@RequestParam(required=false, defaultValue="false") boolean mergeExcelCell,
-			Model model, @AppLoginUser AppUserDetails admin) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
-
-		// 관제지역정보 세션에 존재유부 체크. 없다면 Exception발생(ComponentSupport.validateMngArea)
-		validateMngArea();
-		SearchMap search = new SearchMap(request);
-
-		// 시장관리자는 해당 시장만 조회
-		if(APP_USER_GRADE.MARKET_ADMIN.equals(user.getRolegroupCode())) {
-			search.put("marketSeq", user.getMarketSeq());
-		}
-
-		List<FireDetectorSetVO> list = fireDetectorSetService.getListAll(sort, search);
-		AbleExcelCommand command = new AbleExcelCommand(list, FireDetectorSetVO.class, messageSource);
-
-		command.setFilename("화재감지기 관리");
-		command.setTitle("화재감지기 관리");
-		command.setSheetName("화재감지기 관리");
-
-		if(mergeExcelCell) {
-			command.setMergeMode(AbleExcelMergeMode.MERGE_VERTICAL_HIERARCHY);
-		}
-		command.addCodeMap("fireDetectorStatus", FIRE_DETECTOR_STATUS.getCodeMap());
-
-		model.addAttribute(AbleExcelCommand.MODEL_KEY, command);
-		return ableExcelView;
+		return "areasystem/firedetectorset/firedetectorset";
 	}
 }
