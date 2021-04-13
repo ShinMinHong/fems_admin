@@ -30,7 +30,7 @@
 				</div>
 				<div class="col-md-3">
 					<label class="control-label text-right">CTN번호</label>
-					<input type="text" class="form-control input-xs" placeholder="CTN" data-samask="0000-0000-0000" data-bind="value: searchCtnNo" maxlength="12" />
+					<input type="text" class="form-control input-xs" placeholder="CTN" data-bind="value: searchCtnNo" maxlength="12" />
 				</div>
 			</div>
 			<div class="form-group">
